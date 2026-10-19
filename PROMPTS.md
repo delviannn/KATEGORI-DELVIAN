@@ -103,3 +103,19 @@ Catat prompt penting selama membangun aplikasi: apa yang kamu minta, hasilnya, d
 **[SENDIRI] Proteksi Navigasi Masuk Admin**
 - **Masalah:** Halaman `/admin` sempat dapat diakses langsung sebelum proxy aktif.
 - **Solusi:** Mengaktifkan `proxy.js` sesuai standar Next.js 16 sehingga seluruh rute `/admin` terproteksi otomatis.
+
+## US-07 (Bonus) List Produk di Halaman Admin dari Database
+
+**Prompt:**
+> Bertindak sebagai Senior Full Stack Developer yang berpengalaman membangun aplikasi e-commerce menggunakan Next.js, Supabase, dan Vercel. Implementasikan fitur User Story US-07: List Produk di Halaman Admin dari Database. Sesuai halaman tadi buat agar serasi.
+
+**Hasil:**
+- Mengubah `app/admin/page.jsx` untuk mengambil seluruh daftar produk secara dinamis dari database Supabase melalui `buatSupabaseServer()`.
+- Memperbarui `components/TabelProduk.jsx` untuk menampilkan kolom: Nama Produk (beserta thumbnail foto), Kategori, Harga (format rupiah), Stok, Status Produk (badge aktif), dan tombol Aksi.
+- Menambahkan empty state yang informatif ketika belum ada produk di database.
+- Menambahkan penanganan error Supabase secara jelas dan elegan di halaman admin.
+- Membuat `app/admin/loading.jsx` untuk menampilkan skeleton loading state saat data produk sedang diambil.
+
+**Perbaikan:**
+- Menyediakan fallback nilai stok dan status tanpa mengubah integritas skema database existing di `docs/schema.sql`.
+

@@ -77,4 +77,4 @@ Urutan yang disarankan: US-01, US-02, US-03, US-04, US-05, US-06, lalu fitur bon
 - **Nama usaha:** Toko Delviann
 - **Pembuat:** Delvian (delviannn)
 - **Link aplikasi:** https://katalog-delvian.vercel.app
-- **Fitur bonus yang dikerjakan:** Belum ada (US-01 s.d. US-06 telah selesai)
+- **Fitur bonus yang dikerjakan:** US-07 (List Produk di Halaman Admin dari Database)
