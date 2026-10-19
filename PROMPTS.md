@@ -119,3 +119,43 @@ Catat prompt penting selama membangun aplikasi: apa yang kamu minta, hasilnya, d
 **Perbaikan:**
 - Menyediakan fallback nilai stok dan status tanpa mengubah integritas skema database existing di `docs/schema.sql`.
 
+## US-08 Tambah Produk (Terkunci Login)
+
+**Prompt:**
+> Implementasikan fitur Admin Product Management: US-08: Tambah Produk (harus terkunci login).
+
+**Hasil:**
+- Membuat Server Action `tambahProduk` di `app/admin/actions.js` dengan validasi autentikasi admin (`getUser()`) dan validasi input data wajib (nama, harga positif).
+- Memperbarui `components/FormProduk.jsx` dan `app/admin/produk/baru/page.jsx` untuk menyimpan data produk langsung ke Supabase, menampilkan notifikasi error/sukses, dan melakukan revalidasi cache.
+- Menghapus komponen `CatatanBelumAktif`.
+
+**Perbaikan:**
+- Menyediakan default fallback untuk link foto dan memastikan alur redirect kembali ke `/admin` secara otomatis setelah simpan berhasil.
+
+## US-09 Ubah Produk (Terkunci Login)
+
+**Prompt:**
+> Implementasikan fitur Admin Product Management: US-09: Ubah Produk (harus terkunci login).
+
+**Hasil:**
+- Membuat Server Action `ubahProduk` di `app/admin/actions.js` dengan proteksi login admin dan validasi data.
+- Memperbarui `app/admin/produk/[id]/ubah/page.jsx` untuk mengambil data produk langsung dari Supabase berdasarkan id URL dan mengisinya ke `FormProduk`.
+- Melakukan revalidasi cache halaman admin dan detail produk publik saat update berhasil.
+- Menghapus komponen `CatatanBelumAktif`.
+
+**Perbaikan:**
+- Menghapus ketergantungan pada `cariProdukContoh` dan menggantikannya dengan query Supabase database langsung.
+
+## US-10 Hapus Produk (Terkunci Login)
+
+**Prompt:**
+> Implementasikan fitur Admin Product Management: US-10: Hapus Produk (harus terkunci login).
+
+**Hasil:**
+- Membuat Server Action `hapusProduk` di `app/admin/actions.js` dengan proteksi autentikasi admin di server.
+- Membuat komponen client `components/TombolHapusProduk.jsx` yang menampilkan dialog konfirmasi browser sebelum menghapus.
+- Mengintegrasikan `TombolHapusProduk` ke dalam `components/TabelProduk.jsx`.
+- Melakukan pembaruan daftar produk secara otomatis via `revalidatePath` dan `useTransition`.
+
+**Perbaikan:**
+- Menambahkan alert penanganan error jika penghapusan produk gagal dieksekusi.
