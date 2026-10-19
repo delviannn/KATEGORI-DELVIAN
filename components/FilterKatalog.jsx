@@ -9,28 +9,30 @@ export default function FilterKatalog({ daftarKategori = [] }) {
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const qAwal = searchParams.get("q") || "";
+  const qAwal =
+    searchParams.get("cari") ||
+    searchParams.get("q") ||
+    searchParams.get("search") ||
+    "";
   const kategoriAwal = searchParams.get("kategori") || "";
 
   const [search, setSearch] = useState(qAwal);
 
   const updateFilter = (newQ, newKategori) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams();
 
     if (newQ && newQ.trim()) {
+      params.set("cari", newQ.trim());
       params.set("q", newQ.trim());
-    } else {
-      params.delete("q");
     }
 
     if (newKategori && newKategori !== "Semua") {
       params.set("kategori", newKategori);
-    } else {
-      params.delete("kategori");
     }
 
     startTransition(() => {
-      router.push(`/?${params.toString()}`, { scroll: false });
+      const queryString = params.toString();
+      router.push(queryString ? `/?${queryString}` : "/", { scroll: false });
     });
   };
 
@@ -59,6 +61,7 @@ export default function FilterKatalog({ daftarKategori = [] }) {
         <div className="relative flex-1">
           <input
             type="text"
+            name="cari"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari produk berdasarkan nama..."
@@ -133,4 +136,3 @@ export default function FilterKatalog({ daftarKategori = [] }) {
     </div>
   );
 }
-

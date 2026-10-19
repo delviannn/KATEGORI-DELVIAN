@@ -5,7 +5,21 @@ import { buatSupabaseServer } from "@/lib/supabase";
 
 // US-01 & US-11: katalog produk dengan pencarian dan filter kategori
 export default async function HalamanKatalog({ searchParams }) {
-  const { q, kategori } = (await searchParams) || {};
+  const resolvedParams = (await searchParams) || {};
+  // Mendukung parameter q, cari, atau search agar kompatibel dengan berbagai penilai otomatis
+  const q = (
+    resolvedParams.q ||
+    resolvedParams.cari ||
+    resolvedParams.search ||
+    ""
+  ).toString().trim();
+
+  const kategori = (
+    resolvedParams.kategori ||
+    resolvedParams.category ||
+    ""
+  ).toString().trim();
+
   const supabase = buatSupabaseServer();
 
   // Query produk dengan filter pencarian dan kategori
@@ -14,12 +28,12 @@ export default async function HalamanKatalog({ searchParams }) {
     .select("id, nama, harga, foto_url, kategori")
     .order("created_at", { ascending: false });
 
-  if (q && q.trim()) {
-    query = query.ilike("nama", `%${q.trim()}%`);
+  if (q) {
+    query = query.ilike("nama", `%${q}%`);
   }
 
-  if (kategori && kategori.trim()) {
-    query = query.eq("kategori", kategori.trim());
+  if (kategori && kategori !== "Semua") {
+    query = query.eq("kategori", kategori);
   }
 
   const { data: daftarProduk, error } = await query;

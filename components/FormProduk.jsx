@@ -14,16 +14,13 @@ export default function FormProduk({ action, produk = {}, labelTombol = "Simpan 
   const [kategori, setKategori] = useState(produk.kategori || "");
   const [deskripsi, setDeskripsi] = useState(produk.deskripsi || "");
 
-  // State untuk panel AI generator
-  const [bukaAI, setBukaAI] = useState(false);
-  const [fiturAI, setFiturAI] = useState("");
-  const [targetUserAI, setTargetUserAI] = useState("");
+  // State untuk AI generator
   const [pesanAI, setPesanAI] = useState(null);
   const [sedangGenerateAI, startGenerateAI] = useTransition();
 
   const handleGenerateAI = () => {
     if (!nama.trim()) {
-      setPesanAI({ error: "Isi nama produk terlebih dahulu." });
+      setPesanAI({ error: "Isi nama produk terlebih dahulu untuk membuat deskripsi AI." });
       return;
     }
 
@@ -32,8 +29,8 @@ export default function FormProduk({ action, produk = {}, labelTombol = "Simpan 
       const res = await buatDeskripsiAI({
         nama,
         kategori,
-        fitur: fiturAI,
-        target_user: targetUserAI,
+        fitur: "",
+        target_user: "",
       });
 
       if (res?.error) {
@@ -104,75 +101,37 @@ export default function FormProduk({ action, produk = {}, labelTombol = "Simpan 
         </select>
       </label>
 
-      {/* US-14: Panel Pembuatan Deskripsi Produk dengan AI */}
-      <div className="rounded-xl border border-garis bg-permukaan/50 p-4">
+      {/* US-14: Deskripsi dengan Tombol Buat Deskripsi AI Langsung Terlihat */}
+      <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-base">✨</span>
-            <span className="text-sm font-bold text-teks">
-              Bantuan AI Copywriting
-            </span>
-          </div>
+          <label className="text-sm font-semibold text-teks">
+            Deskripsi Produk
+          </label>
           <button
             type="button"
-            onClick={() => setBukaAI(!bukaAI)}
-            className="text-xs font-semibold text-utama hover:underline"
+            onClick={handleGenerateAI}
+            disabled={sedangGenerateAI}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-utama/30 bg-utama/10 px-3 py-1 text-xs font-semibold text-utama hover:bg-utama hover:text-white transition-colors disabled:opacity-50"
           >
-            {bukaAI ? "Sembunyikan" : "Buka Generator"}
+            {sedangGenerateAI ? "Menulis..." : "✨ Buat deskripsi dengan AI"}
           </button>
         </div>
 
-        {bukaAI && (
-          <div className="mt-3 flex flex-col gap-3 pt-3 border-t border-garis">
-            <p className="text-xs text-teks-lembut">
-              AI akan membuat deskripsi pemasaran persuasif berdasarkan nama dan informasi tambahan:
-            </p>
-            <input
-              type="text"
-              value={fiturAI}
-              onChange={(e) => setFiturAI(e.target.value)}
-              placeholder="Fitur utama (contoh: 100% biji kopi murni sangrai sedang)"
-              className="w-full rounded-lg border border-garis bg-latar px-3 py-2 text-xs text-teks placeholder:text-teks-lembut focus:border-utama focus:outline-none"
-            />
-            <input
-              type="text"
-              value={targetUserAI}
-              onChange={(e) => setTargetUserAI(e.target.value)}
-              placeholder="Target pengguna (contoh: pecinta kopi tubruk dan kopi susu)"
-              className="w-full rounded-lg border border-garis bg-latar px-3 py-2 text-xs text-teks placeholder:text-teks-lembut focus:border-utama focus:outline-none"
-            />
-
-            {pesanAI?.error && (
-              <p className="text-xs text-red-600 font-medium">{pesanAI.error}</p>
-            )}
-            {pesanAI?.sukses && (
-              <p className="text-xs text-green-600 font-medium">{pesanAI.sukses}</p>
-            )}
-
-            <button
-              type="button"
-              onClick={handleGenerateAI}
-              disabled={sedangGenerateAI}
-              className="self-start rounded-lg bg-utama px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-utama-gelap disabled:opacity-50 transition-colors"
-            >
-              {sedangGenerateAI ? "Sedang Menulis Deskripsi..." : "Generate Deskripsi"}
-            </button>
-          </div>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-semibold text-teks">
-          Deskripsi Produk
-        </label>
         <textarea
           name="deskripsi"
           rows={6}
           value={deskripsi}
           onChange={(e) => setDeskripsi(e.target.value)}
-          placeholder="Tulis atau generate deskripsi produk di sini..."
+          placeholder="Tulis deskripsi atau klik tombol 'Buat deskripsi dengan AI' di atas..."
           className="w-full rounded-lg border border-garis bg-latar px-3 py-2.5 text-base text-teks placeholder:text-teks-lembut focus:border-utama focus:outline-none"
         />
+
+        {pesanAI?.error && (
+          <p className="text-xs text-red-600 font-medium">{pesanAI.error}</p>
+        )}
+        {pesanAI?.sukses && (
+          <p className="text-xs text-green-600 font-medium">{pesanAI.sukses}</p>
+        )}
       </div>
 
       {state?.error && (

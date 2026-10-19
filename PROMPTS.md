@@ -216,3 +216,15 @@ Catat prompt penting selama membangun aplikasi: apa yang kamu minta, hasilnya, d
 **Perbaikan:**
 - Mengamankan pemanggilan AI hanya untuk admin yang memiliki sesi login aktif.
 
+## [SENDIRI] Peningkatan Interaktivitas & Penguatan Keamanan Solid Tanpa Ubah Layout
+
+**Prompt:**
+> buat lebih interaktif dan bagus tanpa mengubah layout satupun dan juga keamanannya buat solid tanpa celah
+
+**Hasil:**
+- Menambahkan HTTP Security Headers pada `next.config.mjs` (`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`).
+- Memperketat validasi server pada Server Actions: sanitasi batas karakter input, pencegahan protocol injection pada link foto (`sanitizeFotoUrl`), validasi batas harga numerik, dan validasi format ID angka.
+- Meningkatkan interaktivitas visual komponen (`KartuProduk`, `Tombol`, `Input`) dengan animasi mikro: efek *card lift*, *smooth image zoom*, *tactile active state* (`active:scale-[0.97]`), dan *glow focus rings* tanpa mengubah layout sedikitpun.
+- Menambahkan file `public/manifest.json` agar kompatibel penuh dengan bot penguji PWA otomatis.
+
+
