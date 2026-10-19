@@ -19,7 +19,7 @@ export default function HalamanAdmin() {
         <Tombol href="/admin/produk/baru">Tambah produk</Tombol>
       </div>
       <CatatanBelumAktif>
-        Halaman admin belum terlindungi dan masih memakai data contoh: lihat US-06 dan US-07.
+        Daftar produk masih memakai data contoh: lihat US-07.
       </CatatanBelumAktif>
       <TabelProduk daftarProduk={daftarProduk} />
     </div>

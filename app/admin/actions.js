@@ -33,3 +33,37 @@ export async function keluar() {
   redirect("/admin/login");
 }
 
+// US-05: ganti password admin yang sedang login.
+export async function gantiPassword(_prevState, formData) {
+  const passwordBaru = formData.get("password_baru");
+  const konfirmasi = formData.get("konfirmasi_password");
+
+  if (!passwordBaru || !konfirmasi) {
+    return { error: "Semua field wajib diisi." };
+  }
+
+  if (passwordBaru.length < 8) {
+    return { error: "Password baru minimal 8 karakter." };
+  }
+
+  if (passwordBaru !== konfirmasi) {
+    return { error: "Password baru dan konfirmasi tidak sama." };
+  }
+
+  const supabase = await buatSupabaseSesi();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "Sesi habis, silakan login kembali." };
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    password: passwordBaru,
+  });
+
+  if (error) {
+    return { error: "Gagal mengganti password: " + error.message };
+  }
+
+  return { sukses: "Password berhasil diganti." };
+}
