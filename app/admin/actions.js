@@ -181,3 +181,96 @@ export async function hapusProduk(id) {
   revalidatePath("/");
   return { sukses: true };
 }
+
+// US-14: AI Generated Product Description (OpenAI / Gemini / Smart Fallback)
+export async function buatDeskripsiAI({ nama, kategori, fitur, target_user }) {
+  const supabase = await buatSupabaseSesi();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "Sesi habis, silakan login kembali." };
+  }
+
+  if (!nama || !nama.trim()) {
+    return { error: "Nama produk wajib diisi sebelum membuat deskripsi dengan AI." };
+  }
+
+  const prompt = `Buat deskripsi produk e-commerce dalam Bahasa Indonesia yang persuasif dengan panjang 120-200 kata berdasarkan data berikut:
+Nama Produk: ${nama}
+Kategori: ${kategori || "Umum"}
+Fitur Utama: ${fitur || "Kualitas terjamin, bahan pilihan"}
+Target Pengguna: ${target_user || "Semua kalangan"}
+
+Tulis dengan format:
+- Ringkasan produk
+- Keunggulan utama
+- Manfaat bagi pengguna
+- Call to action`;
+
+  // 1. Integrasi OpenAI API jika OPENAI_API_KEY tersedia
+  const openaiKey = process.env.OPENAI_API_KEY;
+  if (openaiKey) {
+    try {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${openaiKey}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content: "Kamu adalah copywriter profesional e-commerce UMKM Indonesia.",
+            },
+            { role: "user", content: prompt },
+          ],
+          temperature: 0.7,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.choices?.[0]?.message?.content) {
+        return { hasil: data.choices[0].message.content.trim() };
+      }
+    } catch (e) {
+      console.error("OpenAI API fetch error:", e);
+    }
+  }
+
+  // 2. Integrasi Gemini API jika GEMINI_API_KEY tersedia
+  const geminiKey = process.env.GEMINI_API_KEY;
+  if (geminiKey) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+          }),
+        }
+      );
+
+      const data = await res.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text) {
+        return { hasil: text.trim() };
+      }
+    } catch (e) {
+      console.error("Gemini API fetch error:", e);
+    }
+  }
+
+  // 3. Fallback cerdas jika API Key belum dipasang di environment
+  const fallbackDeskripsi = `${nama} merupakan produk pilihan berkualitas unggul pada kategori ${
+    kategori || "katalog kami"
+  }. Dirancang khusus dengan standar mutu terbaik untuk memenuhi kebutuhan Anda.\n\n✨ Keunggulan Utama:\n- Dibuat dari bahan pilihan berkualitas tinggi ${
+    fitur ? `(${fitur})` : "dan higienis"
+  }.\n- Kemasan aman dan menjaga kesegaran serta mutu produk.\n\n🎯 Manfaat:\nSangat cocok untuk ${
+    target_user || "konsumsi keluarga, kebutuhan harian, maupun hadiah istimewa"
+  }.\n\nYuk pesan sekarang sebelum kehabisan stok!`;
+
+  return { hasil: fallbackDeskripsi };
+}

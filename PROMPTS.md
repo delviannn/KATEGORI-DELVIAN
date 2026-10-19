@@ -159,3 +159,60 @@ Catat prompt penting selama membangun aplikasi: apa yang kamu minta, hasilnya, d
 
 **Perbaikan:**
 - Menambahkan alert penanganan error jika penghapusan produk gagal dieksekusi.
+
+## US-11 Filter Kategori dan Pencarian Produk
+
+**Prompt:**
+> Implementasikan fitur US-11: Filter Kategori dan Pencarian Produk.
+
+**Hasil:**
+- Membuat komponen client `components/FilterKatalog.jsx` yang menyediakan kotak pencarian kata kunci dan chip filter kategori berbasis URL search parameters.
+- Mengubah `app/page.jsx` untuk mengeksekusi query dinamis di Supabase (`ilike` untuk nama produk dan `eq` untuk kategori).
+- Mengambil daftar kategori unik secara dinamis dari database.
+- Menyediakan tombol reset filter dan counter jumlah produk yang tampil.
+
+**Perbaikan:**
+- Menggunakan `useTransition` pada navigasi filter agar transisi antarmuka halus tanpa full reload halaman.
+
+## US-12 Pilih Jumlah dan Varian Produk
+
+**Prompt:**
+> Implementasikan fitur US-12: Pilih Jumlah dan Varian Produk.
+
+**Hasil:**
+- Membuat komponen client `components/PilihanPesanan.jsx` pada halaman detail produk `/produk/[id]`.
+- Pengunjung dapat memilih varian produk dan menentukan jumlah pembelian dengan tombol stepper (- dan +) yang divalidasi dengan stok.
+- Subtotal harga dihitung secara real-time.
+- Tombol pemesanan WhatsApp otomatis menyertakan rincian lengkap: nama produk, varian yang dipilih, jumlah item, dan total estimasi harga.
+
+**Perbaikan:**
+- Mengintegrasikan pembatasan stok maksimal agar jumlah pesanan tidak melebihi stok yang tersedia.
+
+## US-13 Progressive Web App (PWA)
+
+**Prompt:**
+> Implementasikan fitur US-13: Progressive Web App (PWA).
+
+**Hasil:**
+- Membuat file `app/manifest.js` yang menghasilkan Web App Manifest standar Next.js dengan nama toko, warna tema, dan icon (`/icons/icon-192.png`, `/icons/icon-512.png`).
+- Membuat Service Worker `public/sw.js` dengan strategi caching network-first untuk dynamic routes dan caching aset statis.
+- Menyediakan halaman offline fallback `public/offline.html`.
+- Membuat komponen `components/PWARegister.jsx` untuk registrasi service worker dan prompt Add to Home Screen.
+- Memperbarui `app/layout.jsx` dengan meta tags PWA (`appleWebApp`, `themeColor`).
+
+**Perbaikan:**
+- Memastikan rute `/admin` dan `/api` dikecualikan dari caching service worker untuk menjaga keamanan dan keaktualan data admin.
+
+## US-14 Deskripsi Produk Dibuat dengan AI
+
+**Prompt:**
+> Implementasikan fitur US-14: Deskripsi Produk Dibuat dengan AI.
+
+**Hasil:**
+- Membuat Server Action `buatDeskripsiAI` di `app/admin/actions.js` yang mendukung OpenAI API (`gpt-4o-mini`), Google Gemini API, dan fallback generator cerdas berbahasa Indonesia.
+- Mengintegrasikan panel bantuan AI copywriting di `components/FormProduk.jsx` dengan parameter nama produk, kategori, fitur utama, dan target pengguna.
+- Hasil copy deskripsi otomatis terisi ke dalam textarea deskripsi untuk ditinjau atau diedit oleh admin sebelum disimpan ke Supabase.
+
+**Perbaikan:**
+- Mengamankan pemanggilan AI hanya untuk admin yang memiliki sesi login aktif.
+
