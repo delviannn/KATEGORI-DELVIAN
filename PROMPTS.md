@@ -227,4 +227,18 @@ Catat prompt penting selama membangun aplikasi: apa yang kamu minta, hasilnya, d
 - Meningkatkan interaktivitas visual komponen (`KartuProduk`, `Tombol`, `Input`) dengan animasi mikro: efek *card lift*, *smooth image zoom*, *tactile active state* (`active:scale-[0.97]`), dan *glow focus rings* tanpa mengubah layout sedikitpun.
 - Menambahkan file `public/manifest.json` agar kompatibel penuh dengan bot penguji PWA otomatis.
 
+## [SENDIRI] Kustomisasi Identitas Toko & Tampilan Unik (Non-Template)
+
+**Prompt:**
+> buat lebih unik dan tidak mengikuti template jadi lebih unik
+
+**Hasil:**
+- Mengganti palet warna default template pada `app/globals.css` dengan tema kustom bertema *Artisan Deep Teal* (`#0f766e`) dan aksen *Terracotta Warm Amber* (`#9a3412`) yang elegan.
+- Menambahkan identitas visual monogram toko `TD` dan live order status badge pada `components/Header.jsx`.
+- Memperkaya presentasi hero section pada `app/page.jsx` dengan badge kualitas lokal dan badge jam operasional terformat rapi.
+- Mempercantik `components/KartuProduk.jsx` dengan floating category chip di sudut gambar, visual price tag, dan subtle hover detail.
+- Memperbarui `components/Footer.jsx` dengan copyright dinamis dan admin login indicator berikon gembok.
+- Seluruh struktur layout utama (`max-w-5xl`, grid katalog 2/3 kolom) tetap dipertahankan 100% utuh sesuai panduan `DESIGN.md`.
+
+
 

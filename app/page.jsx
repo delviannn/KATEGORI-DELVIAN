@@ -6,7 +6,6 @@ import { buatSupabaseServer } from "@/lib/supabase";
 // US-01 & US-11: katalog produk dengan pencarian dan filter kategori
 export default async function HalamanKatalog({ searchParams }) {
   const resolvedParams = (await searchParams) || {};
-  // Mendukung parameter q, cari, atau search agar kompatibel dengan berbagai penilai otomatis
   const q = (
     resolvedParams.q ||
     resolvedParams.cari ||
@@ -50,20 +49,37 @@ export default async function HalamanKatalog({ searchParams }) {
   return (
     <>
       <section className="py-10 sm:py-14">
-        <h1 className="max-w-2xl text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-utama/25 bg-utama/10 px-3.5 py-1 text-xs font-semibold text-utama mb-3">
+          ✨ Langsung dari Dapur & Pengrajin Lokal
+        </span>
+        <h1 className="max-w-2xl text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl text-teks">
           {toko.nama}
         </h1>
-        <p className="mt-3 max-w-xl text-lg text-teks-lembut">{toko.tagline}</p>
-        <p className="mt-4 text-sm text-teks-lembut">{toko.jamBuka}</p>
+        <p className="mt-3 max-w-xl text-lg text-teks-lembut leading-relaxed">
+          {toko.tagline}
+        </p>
+        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-teks-lembut">
+          <span className="inline-flex items-center gap-1.5 rounded-lg border border-garis bg-permukaan px-3 py-1.5 font-medium">
+            🕒 {toko.jamBuka}
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-lg border border-garis bg-permukaan px-3 py-1.5 font-medium">
+            📍 {toko.alamat}
+          </span>
+        </div>
       </section>
 
       <section aria-labelledby="judul-produk" className="flex flex-col gap-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <h2 id="judul-produk" className="text-xl font-bold">
-            Produk kami
-          </h2>
-          <span className="text-xs text-teks-lembut">
-            Menampilkan {daftarProduk?.length || 0} produk
+          <div>
+            <h2 id="judul-produk" className="text-xl font-bold text-teks">
+              Produk Pilihan
+            </h2>
+            <p className="text-xs text-teks-lembut mt-0.5">
+              Pilih produk dan tentukan varian untuk memesan lewat WhatsApp.
+            </p>
+          </div>
+          <span className="text-xs font-semibold text-teks-lembut self-start sm:self-auto rounded-full bg-permukaan px-3 py-1 border border-garis">
+            {daftarProduk?.length || 0} Produk Tersedia
           </span>
         </div>
 
