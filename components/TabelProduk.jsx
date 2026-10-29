@@ -86,7 +86,7 @@ export default function TabelProduk({ daftarProduk }) {
               </td>
               <td className="px-4 py-3">
                 <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
-                  {produk.status || "Aktif"}
+                  {produk.aktif === false ? "Nonaktif" : "Aktif"}
                 </span>
               </td>
               <td className="px-4 py-3">

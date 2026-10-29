@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { toko } from "@/lib/toko";
+import ThemeToggle from "@/components/ThemeToggle";
+import KeranjangBelanja from "@/components/KeranjangBelanja";
 
 export default function Header() {
   return (
@@ -20,6 +22,12 @@ export default function Header() {
         </Link>
 
         <div className="flex items-center gap-3">
+          <nav aria-label="Navigasi utama" className="hidden items-center gap-3 text-sm sm:flex">
+            <Link href="/tentang" className="text-teks-lembut hover:text-utama">Tentang</Link>
+            <Link href="/kontak" className="text-teks-lembut hover:text-utama">Kontak</Link>
+          </nav>
+          <ThemeToggle />
+          <KeranjangBelanja />
           <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             Siap Dipesan

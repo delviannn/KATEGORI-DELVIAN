@@ -79,25 +79,30 @@ export default function FormProduk({ action, produk = {}, labelTombol = "Simpan 
         placeholder="https://... atau /produk/nama-file.svg"
         defaultValue={produk.foto_url || ""}
       />
+      <Input label="Atau unggah foto utama (JPEG, PNG, WebP, maks. 5 MB)" name="foto_file" type="file" accept="image/jpeg,image/png,image/webp" />
 
       <Input
         label="Stok"
         name="stok"
         type="number"
         min="0"
-        defaultValue={produk.stok ?? 10}
+        defaultValue={produk.stok ?? 0}
         placeholder="Contoh: 10"
       />
+
+      <Input label="Harga sebelum promo (opsional)" name="harga_coret" type="number" min="0" defaultValue={produk.harga_coret ?? ""} placeholder="Kosongkan bila tidak promo" />
+      <Input label="Foto tambahan (URL, satu per baris)" name="foto_lainnya" textarea defaultValue={(produk.foto_lainnya || []).join("\n")} placeholder="https://..." />
+      <Input label="Varian (JSON)" name="varian" textarea defaultValue={JSON.stringify(produk.varian || [], null, 2)} placeholder={'[{"nama":"250 g","harga":45000}]'} />
 
       <label className="flex flex-col gap-1.5 text-sm font-semibold">
         Status Produk
         <select
-          name="status"
-          defaultValue={produk.status || "Aktif"}
+          name="aktif"
+          defaultValue={produk.aktif === false ? "false" : "true"}
           className="w-full rounded-lg border border-garis bg-latar px-3 py-2.5 text-base text-teks focus:border-utama focus:outline-none"
         >
-          <option value="Aktif">Aktif</option>
-          <option value="Tidak Aktif">Tidak Aktif</option>
+          <option value="true">Aktif</option>
+          <option value="false">Nonaktif</option>
         </select>
       </label>
 

@@ -1,8 +1,29 @@
-"use server";
+﻿"use server";
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { buatSupabaseSesi } from "@/lib/supabase";
+import { batasiPermintaan } from "@/lib/rate-limit";
+import { randomUUID } from "node:crypto";
+
+async function unggahFoto(formData, supabase, fotoUrl) {
+  const file = formData.get("foto_file");
+  if (!(file instanceof File) || file.size === 0) return { foto_url: fotoUrl };
+  const tipeDiizinkan = new Set(["image/jpeg", "image/png", "image/webp"]);
+  if (!tipeDiizinkan.has(file.type) || file.size > 5 * 1024 * 1024) {
+    return { error: "Foto harus berformat JPEG, PNG, atau WebP dengan ukuran maksimal 5 MB." };
+  }
+  const ekstensi = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" }[file.type];
+  const path = `${randomUUID()}.${ekstensi}`;
+  const { error } = await supabase.storage.from("product-images").upload(path, Buffer.from(await file.arrayBuffer()), {
+    contentType: file.type,
+    upsert: false,
+    cacheControl: "31536000",
+  });
+  if (error) return { error: "Foto gagal diunggah. Periksa konfigurasi Supabase Storage." };
+  const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+  return { foto_url: data.publicUrl };
+}
 
 // Helper validasi link gambar aman (mencegah javascript: atau protocol injection)
 function sanitizeFotoUrl(url) {
@@ -18,8 +39,40 @@ function sanitizeFotoUrl(url) {
   return "/produk/placeholder.svg";
 }
 
+function bacaDataProduk(formData) {
+  const nama = formData.get("nama")?.toString().trim() || "";
+  const harga = Number(formData.get("harga"));
+  const stok = Number(formData.get("stok"));
+  const hargaCoretRaw = formData.get("harga_coret")?.toString().trim();
+  const harga_coret = hargaCoretRaw ? Number(hargaCoretRaw) : null;
+  const foto_url = sanitizeFotoUrl(formData.get("foto_url")?.toString());
+  const kategori = formData.get("kategori")?.toString().trim() || null;
+  const deskripsi = formData.get("deskripsi")?.toString().trim() || null;
+  const foto_lainnya = (formData.get("foto_lainnya")?.toString() || "")
+    .split(/\r?\n/).map((url) => url.trim()).filter(Boolean).slice(0, 10)
+    .map((url) => sanitizeFotoUrl(url)).filter((url) => url !== "/produk/placeholder.svg");
+  let varian = [];
+  try {
+    varian = JSON.parse(formData.get("varian")?.toString() || "[]");
+  } catch {
+    return { error: "Format varian harus berupa JSON yang valid." };
+  }
+  if (!Array.isArray(varian) || varian.length > 20 || varian.some((item) =>
+    !item || typeof item.nama !== "string" || item.nama.trim().length < 1 || item.nama.length > 80 ||
+    (item.harga !== undefined && (!Number.isSafeInteger(item.harga) || item.harga < 0 || item.harga > 1000000000))
+  )) return { error: "Varian harus berupa daftar nama dan harga yang valid (maksimal 20)." };
+  if (!nama || nama.length > 150) return { error: "Nama produk wajib diisi dan maksimal 150 karakter." };
+  if (!Number.isSafeInteger(harga) || harga < 0 || harga > 1000000000) return { error: "Harga produk tidak valid." };
+  if (!Number.isSafeInteger(stok) || stok < 0 || stok > 1000000) return { error: "Stok harus berupa bilangan bulat dari 0 sampai 1.000.000." };
+  if (harga_coret !== null && (!Number.isSafeInteger(harga_coret) || harga_coret <= harga || harga_coret > 1000000000)) return { error: "Harga sebelum promo harus lebih tinggi dari harga jual." };
+  return { data: { nama, harga, stok, harga_coret, foto_url, foto_lainnya, kategori: kategori?.slice(0, 60) || null, deskripsi: deskripsi?.slice(0, 3000) || null, aktif: formData.get("aktif") === "true", varian } };
+}
+
 // US-04: login admin dengan email dan password.
 export async function login(_prevState, formData) {
+  if (!(await batasiPermintaan("login", 10, 900))) {
+    return { error: "Terlalu banyak percobaan. Tunggu 15 menit sebelum mencoba lagi." };
+  }
   const email = formData.get("email")?.toString().trim();
   const password = formData.get("password")?.toString();
 
@@ -86,7 +139,7 @@ export async function gantiPassword(_prevState, formData) {
   });
 
   if (error) {
-    return { error: "Gagal mengganti password: " + error.message };
+    return { error: "Gagal mengganti password. Pastikan password memenuhi ketentuan, lalu coba lagi." };
   }
 
   return { sukses: "Password berhasil diganti." };
@@ -101,37 +154,18 @@ export async function tambahProduk(_prevState, formData) {
     return { error: "Sesi habis, silakan login kembali." };
   }
 
-  const nama = formData.get("nama")?.toString().trim();
-  const hargaRaw = formData.get("harga");
-  const harga = hargaRaw ? parseInt(hargaRaw.toString(), 10) : NaN;
-  const kategori = formData.get("kategori")?.toString().trim() || null;
-  const foto_url = sanitizeFotoUrl(formData.get("foto_url")?.toString());
-  const deskripsi = formData.get("deskripsi")?.toString().trim() || null;
-
-  if (!nama) {
-    return { error: "Nama produk wajib diisi." };
-  }
-  if (nama.length > 150) {
-    return { error: "Nama produk maksimal 150 karakter." };
-  }
-
-  if (isNaN(harga) || harga < 0) {
-    return { error: "Harga produk harus berupa angka positif." };
-  }
-  if (harga > 1000000000) {
-    return { error: "Harga produk melebihi batas wajar." };
-  }
+  const parsed = bacaDataProduk(formData);
+  if (parsed.error) return { error: parsed.error };
+  const foto = await unggahFoto(formData, supabase, parsed.data.foto_url);
+  if (foto.error) return { error: foto.error };
 
   const { error } = await supabase.from("produk").insert({
-    nama: nama.slice(0, 150),
-    harga: Math.floor(harga),
-    kategori: kategori ? kategori.slice(0, 60) : null,
-    foto_url,
-    deskripsi: deskripsi ? deskripsi.slice(0, 3000) : null,
+    ...parsed.data,
+    foto_url: foto.foto_url,
   });
 
   if (error) {
-    return { error: "Gagal menyimpan produk: " + error.message };
+    return { error: "Gagal menyimpan produk. Periksa data dan coba lagi." };
   }
 
   revalidatePath("/admin");
@@ -154,40 +188,22 @@ export async function ubahProduk(_prevState, formData) {
     return { error: "ID produk tidak valid." };
   }
 
-  const nama = formData.get("nama")?.toString().trim();
-  const hargaRaw = formData.get("harga");
-  const harga = hargaRaw ? parseInt(hargaRaw.toString(), 10) : NaN;
-  const kategori = formData.get("kategori")?.toString().trim() || null;
-  const foto_url = sanitizeFotoUrl(formData.get("foto_url")?.toString());
-  const deskripsi = formData.get("deskripsi")?.toString().trim() || null;
-
-  if (!nama) {
-    return { error: "Nama produk wajib diisi." };
-  }
-  if (nama.length > 150) {
-    return { error: "Nama produk maksimal 150 karakter." };
-  }
-
-  if (isNaN(harga) || harga < 0) {
-    return { error: "Harga produk harus berupa angka positif." };
-  }
-  if (harga > 1000000000) {
-    return { error: "Harga produk melebihi batas wajar." };
-  }
+  const parsed = bacaDataProduk(formData);
+  if (parsed.error) return { error: parsed.error };
+  const foto = await unggahFoto(formData, supabase, parsed.data.foto_url);
+  if (foto.error) return { error: foto.error };
 
   const { error } = await supabase
     .from("produk")
     .update({
-      nama: nama.slice(0, 150),
-      harga: Math.floor(harga),
-      kategori: kategori ? kategori.slice(0, 60) : null,
-      foto_url,
-      deskripsi: deskripsi ? deskripsi.slice(0, 3000) : null,
+      ...parsed.data,
+      foto_url: foto.foto_url,
+      diperbarui_at: new Date().toISOString(),
     })
     .eq("id", id);
 
   if (error) {
-    return { error: "Gagal memperbarui produk: " + error.message };
+    return { error: "Gagal memperbarui produk. Periksa data dan coba lagi." };
   }
 
   revalidatePath("/admin");
@@ -213,7 +229,7 @@ export async function hapusProduk(idRaw) {
   const { error } = await supabase.from("produk").delete().eq("id", id);
 
   if (error) {
-    return { error: "Gagal menghapus produk: " + error.message };
+    return { error: "Gagal menghapus produk. Silakan coba lagi." };
   }
 
   revalidatePath("/admin");
@@ -277,8 +293,8 @@ Tulis dengan format:
       if (data.choices?.[0]?.message?.content) {
         return { hasil: data.choices[0].message.content.trim() };
       }
-    } catch (e) {
-      console.error("OpenAI API fetch error:", e);
+    } catch {
+      // Hindari mencatat detail permintaan dari provider pihak ketiga.
     }
   }
 
@@ -302,19 +318,10 @@ Tulis dengan format:
       if (text) {
         return { hasil: text.trim() };
       }
-    } catch (e) {
-      console.error("Gemini API fetch error:", e);
+    } catch {
+      // Hindari mencatat detail permintaan dari provider pihak ketiga.
     }
   }
 
-  // 3. Fallback cerdas jika API Key belum dipasang di environment
-  const fallbackDeskripsi = `${cleanNama} merupakan produk pilihan berkualitas unggul pada kategori ${
-    cleanKategori || "katalog kami"
-  }. Dirancang khusus dengan standar mutu terbaik untuk memenuhi kebutuhan Anda.\n\n✨ Keunggulan Utama:\n- Dibuat dari bahan pilihan berkualitas tinggi ${
-    cleanFitur ? `(${cleanFitur})` : "dan higienis"
-  }.\n- Kemasan aman dan menjaga kesegaran serta mutu produk.\n\n🎯 Manfaat:\nSangat cocok untuk ${
-    cleanTarget || "konsumsi keluarga, kebutuhan harian, maupun hadiah istimewa"
-  }.\n\nYuk pesan sekarang sebelum kehabisan stok!`;
-
-  return { hasil: fallbackDeskripsi };
+  return { error: "Layanan AI belum tersedia. Atur OPENAI_API_KEY atau GEMINI_API_KEY di environment server." };
 }

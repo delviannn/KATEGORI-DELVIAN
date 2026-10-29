@@ -30,6 +30,20 @@ html {
   scroll-behavior: smooth;
 }
 
+html.dark {
+  color-scheme: dark;
+  --color-latar: #111a17;
+  --color-permukaan: #1b2923;
+  --color-garis: #34473d;
+  --color-teks: #edf5f0;
+  --color-teks-lembut: #b3c3ba;
+  --color-utama: #5bc49b;
+  --color-utama-gelap: #39a77d;
+  --color-harga: #ffd39a;
+  --color-harga-latar: #50351c;
+  --color-bahaya: #ff938c;
+}
+
 :focus-visible {
   outline: 2px solid var(--color-utama);
   outline-offset: 2px;

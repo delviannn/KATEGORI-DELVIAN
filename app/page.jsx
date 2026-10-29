@@ -1,5 +1,6 @@
 import KartuProduk from "@/components/KartuProduk";
 import FilterKatalog from "@/components/FilterKatalog";
+import Link from "next/link";
 import { toko } from "@/lib/toko";
 import { buatSupabaseServer } from "@/lib/supabase";
 
@@ -18,14 +19,24 @@ export default async function HalamanKatalog({ searchParams }) {
     resolvedParams.category ||
     ""
   ).toString().trim();
+  const sort = ["baru", "harga-naik", "harga-turun", "unggulan"].includes(resolvedParams.urut)
+    ? resolvedParams.urut
+    : "baru";
+  const halaman = Math.max(1, Math.min(10000, Number.parseInt(resolvedParams.halaman, 10) || 1));
+  const ukuranHalaman = 12;
 
   const supabase = buatSupabaseServer();
 
   // Query produk dengan filter pencarian dan kategori
   let query = supabase
     .from("produk")
-    .select("id, nama, harga, foto_url, kategori")
-    .order("created_at", { ascending: false });
+    .select("id, nama, harga, harga_coret, foto_url, foto_lainnya, kategori, stok, aktif, varian", { count: "exact" })
+    .eq("aktif", true);
+
+  if (sort === "harga-naik") query = query.order("harga", { ascending: true });
+  else if (sort === "harga-turun") query = query.order("harga", { ascending: false });
+  else if (sort === "unggulan") query = query.order("urutan", { ascending: true });
+  else query = query.order("created_at", { ascending: false });
 
   if (q) {
     query = query.ilike("nama", `%${q}%`);
@@ -35,12 +46,13 @@ export default async function HalamanKatalog({ searchParams }) {
     query = query.eq("kategori", kategori);
   }
 
-  const { data: daftarProduk, error } = await query;
+  const { data: daftarProduk, error, count } = await query.range((halaman - 1) * ukuranHalaman, halaman * ukuranHalaman - 1);
 
   // Ambil daftar seluruh kategori unik untuk chips filter
   const { data: semuaProduk } = await supabase
     .from("produk")
-    .select("kategori");
+    .select("kategori")
+    .eq("aktif", true);
 
   const daftarKategori = Array.from(
     new Set(semuaProduk?.map((p) => p.kategori).filter(Boolean))
@@ -86,9 +98,22 @@ export default async function HalamanKatalog({ searchParams }) {
         {/* US-11: Filter dan Pencarian */}
         <FilterKatalog daftarKategori={daftarKategori} />
 
+        <form className="flex items-center gap-2 text-sm" method="get">
+          {q && <input type="hidden" name="cari" value={q} />}
+          {kategori && <input type="hidden" name="kategori" value={kategori} />}
+          <label htmlFor="urut" className="text-teks-lembut">Urutkan:</label>
+          <select id="urut" name="urut" defaultValue={sort} className="rounded-lg border border-garis bg-latar px-3 py-2 text-teks">
+            <option value="baru">Terbaru</option>
+            <option value="harga-naik">Harga terendah</option>
+            <option value="harga-turun">Harga tertinggi</option>
+            <option value="unggulan">Pilihan toko</option>
+          </select>
+          <button className="rounded-lg border border-garis px-3 py-2 font-medium hover:bg-permukaan">Terapkan</button>
+        </form>
+
         {error ? (
           <p className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-700">
-            Gagal memuat produk: {error.message}
+            Katalog sedang tidak dapat dimuat. Silakan coba lagi beberapa saat lagi.
           </p>
         ) : !daftarProduk || daftarProduk.length === 0 ? (
           <div className="rounded-2xl border border-garis bg-latar py-14 text-center">
@@ -105,6 +130,13 @@ export default async function HalamanKatalog({ searchParams }) {
               <KartuProduk key={produk.id} produk={produk} />
             ))}
           </div>
+        )}
+        {count > ukuranHalaman && (
+          <nav aria-label="Navigasi halaman katalog" className="flex items-center justify-center gap-4 py-4">
+            {halaman > 1 ? <Link className="rounded-lg border border-garis px-4 py-2" href={`/?${new URLSearchParams({ ...(q ? { cari: q } : {}), ...(kategori ? { kategori } : {}), urut: sort, halaman: String(halaman - 1) })}`}>Sebelumnya</Link> : <span />}
+            <span className="text-sm text-teks-lembut">Halaman {halaman} dari {Math.ceil(count / ukuranHalaman)}</span>
+            {halaman < Math.ceil(count / ukuranHalaman) ? <Link className="rounded-lg border border-garis px-4 py-2" href={`/?${new URLSearchParams({ ...(q ? { cari: q } : {}), ...(kategori ? { kategori } : {}), urut: sort, halaman: String(halaman + 1) })}`}>Berikutnya</Link> : <span />}
+          </nav>
         )}
       </section>
     </>

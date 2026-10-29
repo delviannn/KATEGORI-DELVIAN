@@ -18,6 +18,12 @@ export default function KartuProduk({ produk }) {
             {produk.kategori}
           </span>
         )}
+        {produk.harga_coret > produk.harga && (
+          <span className="absolute right-2.5 top-2.5 rounded-full bg-red-700 px-2.5 py-1 text-[10px] font-bold text-white">Promo</span>
+        )}
+        {produk.stok === 0 && (
+          <span className="absolute bottom-2.5 left-2.5 rounded-full bg-teks/90 px-2.5 py-1 text-[10px] font-bold text-white">Stok habis</span>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-2 p-3.5">
@@ -28,6 +34,7 @@ export default function KartuProduk({ produk }) {
           <p className="rounded-md bg-harga-latar px-2.5 py-1 text-xs font-bold text-harga transition-transform duration-200 group-hover:scale-105">
             {formatRupiah(produk.harga)}
           </p>
+          {produk.harga_coret > produk.harga && <span className="text-xs text-teks-lembut line-through">{formatRupiah(produk.harga_coret)}</span>}
           <span className="text-[11px] font-semibold text-utama opacity-0 transition-opacity duration-200 group-hover:opacity-100 hidden sm:inline">
             Detail →
           </span>

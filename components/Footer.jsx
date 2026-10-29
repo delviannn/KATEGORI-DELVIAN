@@ -24,6 +24,10 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-col gap-3 sm:items-end">
+          <nav aria-label="Tautan toko" className="flex gap-4 text-xs">
+            <Link href="/tentang" className="hover:text-utama">Tentang</Link>
+            <Link href="/kontak" className="hover:text-utama">Kontak</Link>
+          </nav>
           <span className="text-xs text-teks-lembut">
             © {new Date().getFullYear()} {toko.nama}. Seluruh hak cipta dilindungi.
           </span>

@@ -1,0 +1,26 @@
+import { NextResponse } from "next/server";
+import { buatSupabaseServer } from "@/lib/supabase";
+import { batasiPermintaan } from "@/lib/rate-limit";
+
+export async function POST(request) {
+  if (request.headers.get("origin") !== request.nextUrl.origin) {
+    return NextResponse.json({ error: "Permintaan tidak valid." }, { status: 403 });
+  }
+  if (!(await batasiPermintaan("whatsapp_click", 60, 3600))) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan." }, { status: 429 });
+  }
+  try {
+    const body = await request.json();
+    const produkId = Number(body.produkId);
+    const jumlah = Number(body.jumlah || 1);
+    if (!Number.isSafeInteger(produkId) || produkId < 1 || !Number.isSafeInteger(jumlah) || jumlah < 1 || jumlah > 1000) {
+      return NextResponse.json({ error: "Data tidak valid." }, { status: 400 });
+    }
+    const supabase = buatSupabaseServer();
+    const { error } = await supabase.from("klik_whatsapp").insert({ produk_id: produkId, jumlah });
+    if (error) return NextResponse.json({ error: "Pencatatan tidak tersedia." }, { status: 503 });
+    return new NextResponse(null, { status: 204 });
+  } catch {
+    return NextResponse.json({ error: "Permintaan tidak dapat diproses." }, { status: 400 });
+  }
+}

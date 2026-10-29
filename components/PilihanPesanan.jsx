@@ -3,16 +3,21 @@
 import { useState } from "react";
 import { toko } from "@/lib/toko";
 import { formatRupiah } from "@/lib/format";
+import { simpanKeKeranjang } from "@/components/KeranjangBelanja";
 
 // US-12: Komponen pemilihan varian dan jumlah pesanan dengan integrasi WhatsApp
 export default function PilihanPesanan({ produk }) {
-  // Opsi varian disesuaikan dengan kategori atau opsi default yang fleksibel
-  const varianOptions = ["Reguler / Standar", "Kemasan Besar", "Paket Hemat"];
+  const varianOptions = Array.isArray(produk.varian)
+    ? produk.varian.filter((item) => item && typeof item.nama === "string" && item.nama.trim())
+    : [];
 
-  const [varianDipilih, setVarianDipilih] = useState(varianOptions[0]);
+  const [varianDipilih, setVarianDipilih] = useState(varianOptions[0]?.nama || "");
   const [jumlah, setJumlah] = useState(1);
+  const [pesanKeranjang, setPesanKeranjang] = useState("");
 
-  const stokMaksimal = produk.stok !== undefined && produk.stok !== null ? produk.stok : 50;
+  const stokMaksimal = Number.isInteger(produk.stok) ? produk.stok : 0;
+  const opsiAktif = varianOptions.find((opsi) => opsi.nama === varianDipilih);
+  const hargaSatuan = Number.isInteger(opsiAktif?.harga) ? opsiAktif.harga : produk.harga;
 
   const handleKurang = () => {
     if (jumlah > 1) {
@@ -26,36 +31,36 @@ export default function PilihanPesanan({ produk }) {
     }
   };
 
-  const totalHarga = produk.harga * jumlah;
+  const totalHarga = hargaSatuan * jumlah;
 
   // Format pesan WhatsApp yang rapi dan memuat rincian pesanan
-  const pesan = `Halo, saya ingin memesan:\n\n*${produk.nama}*\n- Varian: ${varianDipilih}\n- Jumlah: ${jumlah} item\n- Total Harga: ${formatRupiah(totalHarga)}\n\nApakah stok masih tersedia?`;
+  const pesan = `Halo, saya ingin memesan:\n\n*${produk.nama}*${varianDipilih ? `\n- Varian: ${varianDipilih}` : ""}\n- Jumlah: ${jumlah} item\n- Total Harga: ${formatRupiah(totalHarga)}\n\nApakah stok masih tersedia?`;
   const urlWhatsApp = `https://wa.me/${toko.nomorWhatsApp}?text=${encodeURIComponent(pesan)}`;
 
   return (
     <div className="flex flex-col gap-5 pt-2">
       {/* Pilihan Varian */}
-      <div className="flex flex-col gap-2">
+      {varianOptions.length > 0 && <div className="flex flex-col gap-2">
         <label className="text-sm font-semibold text-teks">
           Pilih Varian
         </label>
         <div className="flex flex-wrap gap-2">
           {varianOptions.map((v) => (
             <button
-              key={v}
+              key={v.nama}
               type="button"
-              onClick={() => setVarianDipilih(v)}
+              onClick={() => setVarianDipilih(v.nama)}
               className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${
-                varianDipilih === v
+                varianDipilih === v.nama
                   ? "border-utama bg-utama/10 text-utama font-bold"
                   : "border-garis bg-latar text-teks hover:border-utama"
               }`}
             >
-              {v}
+              {v.nama}{Number.isInteger(v.harga) ? ` · ${formatRupiah(v.harga)}` : ""}
             </button>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* Pilihan Jumlah & Subtotal */}
       <div className="flex flex-col gap-2">
@@ -101,6 +106,14 @@ export default function PilihanPesanan({ produk }) {
       {/* Tombol Pesan via WhatsApp */}
       <a
         href={urlWhatsApp}
+        onClick={() => {
+          fetch("/api/analytics/whatsapp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ produkId: produk.id, jumlah }),
+            keepalive: true,
+          }).catch(() => undefined);
+        }}
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-utama px-5 py-3.5 font-semibold text-white shadow-sm hover:bg-utama-gelap transition-colors sm:w-auto"
@@ -113,6 +126,11 @@ export default function PilihanPesanan({ produk }) {
         </svg>
         Pesan via WhatsApp
       </a>
+      <button type="button" onClick={() => {
+        const berhasil = simpanKeKeranjang({ id: Number(produk.id), nama: produk.nama, harga: hargaSatuan, jumlah, varian: varianDipilih });
+        setPesanKeranjang(berhasil ? "Produk ditambahkan ke keranjang." : "Keranjang penuh atau penyimpanan browser tidak tersedia.");
+      }} className="inline-flex w-full items-center justify-center rounded-lg border border-utama px-5 py-3 font-semibold text-utama hover:bg-utama/10 sm:w-auto">Tambah ke keranjang</button>
+      <p className="sr-only" aria-live="polite">{pesanKeranjang}</p>
     </div>
   );
 }
