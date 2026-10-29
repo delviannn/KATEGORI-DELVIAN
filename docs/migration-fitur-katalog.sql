@@ -1,5 +1,17 @@
 -- Jalankan satu kali di Supabase SQL Editor setelah mencadangkan database.
 -- Perluasan skema US-15 sampai US-50. Tabel produk yang ada tetap dipakai.
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security invoker
+set search_path = ''
+as $$
+  select coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin';
+$$;
+revoke all on function public.is_admin() from public, anon;
+grant execute on function public.is_admin() to authenticated;
+
 alter table public.produk
   add column if not exists stok integer not null default 0 check (stok >= 0),
   add column if not exists aktif boolean not null default true,
@@ -59,6 +71,10 @@ set search_path = ''
 as $$
 declare current_hits integer;
 begin
+  if request_limit < 1 or window_seconds < 1 or window_seconds > 86400
+    or bucket_key !~ '^[0-9a-f]{64}$' then
+    return false;
+  end if;
   insert into public.rate_limit_bucket (bucket_key, window_started_at, hits)
   values (bucket_key, now(), 1)
   on conflict (bucket_key) do update set
@@ -67,6 +83,10 @@ begin
     window_started_at = case when public.rate_limit_bucket.window_started_at < now() - make_interval(secs => window_seconds)
       then now() else public.rate_limit_bucket.window_started_at end
   returning hits into current_hits;
+  if random() < 0.01 then
+    delete from public.rate_limit_bucket
+    where window_started_at < now() - interval '1 day';
+  end if;
   return current_hits <= request_limit;
 end;
 $$;
@@ -79,10 +99,10 @@ on conflict (id) do update set public = true, file_size_limit = 5242880,
   allowed_mime_types = array['image/jpeg','image/png','image/webp'];
 drop policy if exists product_images_admin_upload on storage.objects;
 create policy product_images_admin_upload on storage.objects for insert to authenticated
-with check (bucket_id = 'product-images');
+with check (bucket_id = 'product-images' and public.is_admin());
 drop policy if exists product_images_admin_update on storage.objects;
 create policy product_images_admin_update on storage.objects for delete to authenticated
-using (bucket_id = 'product-images');
+using (bucket_id = 'product-images' and public.is_admin());
 create index if not exists produk_kategori_idx on public.produk(kategori);
 create index if not exists produk_aktif_urutan_idx on public.produk(aktif, urutan, id);
 create index if not exists ulasan_produk_status_idx on public.ulasan(produk_id, status);
@@ -101,21 +121,30 @@ alter table public.klik_whatsapp enable row level security;
 alter table public.log_admin enable row level security;
 
 drop policy if exists kategori_baca_admin on public.kategori;
-create policy kategori_baca_admin on public.kategori for select to authenticated using (true);
+create policy kategori_baca_admin on public.kategori for select to authenticated using (public.is_admin());
 drop policy if exists kategori_kelola_admin on public.kategori;
-create policy kategori_kelola_admin on public.kategori for all to authenticated using (true) with check (true);
+create policy kategori_kelola_admin on public.kategori for all to authenticated using (public.is_admin()) with check (public.is_admin());
 drop policy if exists toko_baca_admin on public.pengaturan_toko;
-create policy toko_baca_admin on public.pengaturan_toko for select to authenticated using (true);
+create policy toko_baca_admin on public.pengaturan_toko for select to authenticated using (public.is_admin());
 drop policy if exists toko_ubah_admin on public.pengaturan_toko;
-create policy toko_ubah_admin on public.pengaturan_toko for all to authenticated using (true) with check (true);
+create policy toko_ubah_admin on public.pengaturan_toko for all to authenticated using (public.is_admin()) with check (public.is_admin());
 drop policy if exists ulasan_baca_publik on public.ulasan;
 create policy ulasan_baca_publik on public.ulasan for select to anon, authenticated using (status = 'disetujui');
 drop policy if exists ulasan_kelola_admin on public.ulasan;
-create policy ulasan_kelola_admin on public.ulasan for all to authenticated using (true) with check (true);
+create policy ulasan_kelola_admin on public.ulasan for all to authenticated using (public.is_admin()) with check (public.is_admin());
 drop policy if exists klik_baca_admin on public.klik_whatsapp;
-create policy klik_baca_admin on public.klik_whatsapp for select to authenticated using (true);
+create policy klik_baca_admin on public.klik_whatsapp for select to authenticated using (public.is_admin());
 drop policy if exists log_baca_admin on public.log_admin;
-create policy log_baca_admin on public.log_admin for select to authenticated using (true);
+create policy log_baca_admin on public.log_admin for select to authenticated using (public.is_admin());
+
+drop policy if exists admin_baca_produk on public.produk;
+create policy admin_baca_produk on public.produk for select to authenticated using (public.is_admin());
+drop policy if exists admin_tambah_produk on public.produk;
+create policy admin_tambah_produk on public.produk for insert to authenticated with check (public.is_admin());
+drop policy if exists admin_ubah_produk on public.produk;
+create policy admin_ubah_produk on public.produk for update to authenticated using (public.is_admin()) with check (public.is_admin());
+drop policy if exists admin_hapus_produk on public.produk;
+create policy admin_hapus_produk on public.produk for delete to authenticated using (public.is_admin());
 
 -- Penulisan analytics dan ulasan publik dilakukan hanya melalui server route,
 -- menggunakan secret key yang tidak pernah dikirim ke browser.

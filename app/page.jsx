@@ -1,4 +1,4 @@
-import KartuProduk from "@/components/KartuProduk";
+﻿import KartuProduk from "@/components/KartuProduk";
 import FilterKatalog from "@/components/FilterKatalog";
 import Link from "next/link";
 import { toko } from "@/lib/toko";
@@ -60,27 +60,27 @@ export default async function HalamanKatalog({ searchParams }) {
 
   return (
     <>
-      <section className="py-10 sm:py-14">
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-utama/25 bg-utama/10 px-3.5 py-1 text-xs font-semibold text-utama mb-3">
-          ✨ Langsung dari Dapur & Pengrajin Lokal
+      <section className="hero-katalog relative isolate mt-6 overflow-hidden rounded-[2rem] border border-garis px-6 py-10 shadow-sm sm:mt-9 sm:px-10 sm:py-14">
+        <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-20 -z-10 h-72 w-72 rounded-full bg-utama/10 blur-3xl" />
+        <div aria-hidden="true" className="pointer-events-none absolute -bottom-28 right-1/3 -z-10 h-64 w-64 rounded-full bg-harga-latar/70 blur-3xl" />
+        <span className="inline-flex items-center gap-2 rounded-full border border-utama/20 bg-latar/80 px-3.5 py-1.5 text-xs font-bold text-utama shadow-sm">
+          <span aria-hidden="true" className="h-2 w-2 rounded-full bg-utama" />Produk pilihan usaha lokal
         </span>
-        <h1 className="max-w-2xl text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl text-teks">
-          {toko.nama}
+        <h1 className="mt-5 max-w-2xl text-4xl font-extrabold leading-[1.08] tracking-tight text-teks sm:text-6xl">
+          Temukan yang <span className="text-utama">istimewa</span> di {toko.nama}
         </h1>
-        <p className="mt-3 max-w-xl text-lg text-teks-lembut leading-relaxed">
-          {toko.tagline}
-        </p>
-        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-teks-lembut">
-          <span className="inline-flex items-center gap-1.5 rounded-lg border border-garis bg-permukaan px-3 py-1.5 font-medium">
-            🕒 {toko.jamBuka}
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-lg border border-garis bg-permukaan px-3 py-1.5 font-medium">
-            📍 {toko.alamat}
-          </span>
+        <p className="mt-4 max-w-xl text-base leading-7 text-teks-lembut sm:text-lg">{toko.tagline}</p>
+        <div className="mt-7 flex flex-wrap gap-3">
+          <a href="#produk" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-utama px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-utama-gelap">Jelajahi katalog <span aria-hidden="true" className="ml-2">↓</span></a>
+          <Link href="/kontak" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-garis bg-latar/80 px-5 py-3 text-sm font-bold text-teks transition hover:border-utama hover:text-utama">Hubungi toko</Link>
+        </div>
+        <div className="mt-9 flex flex-wrap gap-2 text-xs text-teks-lembut">
+          <span className="rounded-lg border border-garis bg-latar/75 px-3 py-2 font-medium">Jam buka · {toko.jamBuka}</span>
+          <span className="rounded-lg border border-garis bg-latar/75 px-3 py-2 font-medium">Lokasi · {toko.alamat}</span>
         </div>
       </section>
 
-      <section aria-labelledby="judul-produk" className="flex flex-col gap-6">
+      <section id="produk" aria-labelledby="judul-produk" className="flex scroll-mt-24 flex-col gap-6 py-10 sm:py-14">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 id="judul-produk" className="text-xl font-bold text-teks">
@@ -91,7 +91,7 @@ export default async function HalamanKatalog({ searchParams }) {
             </p>
           </div>
           <span className="text-xs font-semibold text-teks-lembut self-start sm:self-auto rounded-full bg-permukaan px-3 py-1 border border-garis">
-            {daftarProduk?.length || 0} Produk Tersedia
+            {count || 0} Produk Tersedia
           </span>
         </div>
 

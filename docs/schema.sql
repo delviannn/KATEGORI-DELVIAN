@@ -16,6 +16,18 @@ create table if not exists public.produk (
 -- 2. Row Level Security
 -- Tidak ada izin untuk publik: akses langsung ke tabel dari luar aplikasi ditolak.
 -- Hanya admin yang sudah login yang boleh membaca dan mengubah data.
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security invoker
+set search_path = ''
+as $$
+  select coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin';
+$$;
+revoke all on function public.is_admin() from public, anon;
+grant execute on function public.is_admin() to authenticated;
+
 alter table public.produk enable row level security;
 
 drop policy if exists "admin_baca_produk" on public.produk;
@@ -24,15 +36,15 @@ drop policy if exists "admin_ubah_produk" on public.produk;
 drop policy if exists "admin_hapus_produk" on public.produk;
 
 create policy "admin_baca_produk" on public.produk
-  for select to authenticated using (true);
+  for select to authenticated using (public.is_admin());
 
 create policy "admin_tambah_produk" on public.produk
-  for insert to authenticated with check (true);
+  for insert to authenticated with check (public.is_admin());
 
 create policy "admin_ubah_produk" on public.produk
-  for update to authenticated using (true) with check (true);
+  for update to authenticated using (public.is_admin()) with check (public.is_admin());
 
 create policy "admin_hapus_produk" on public.produk
-  for delete to authenticated using (true);
+  for delete to authenticated using (public.is_admin());
 
--- Data katalog dikelola melalui dashboard admin, tidak ada seed/mock produk.\n
+-- Data katalog dikelola melalui dashboard admin, tidak ada seed/mock produk.

@@ -9,7 +9,15 @@ Template workshop vibe coding Creative Hub App Talent (CHAT) 2026. Repo ini beri
 1. **Salin repo ke akun GitHub-mu.** Klik tombol **Deploy with Vercel** di atas. Vercel akan membuat repo baru di akun GitHub-mu dan langsung men-deploy-nya. Setelah selesai, buka link Vercel-mu: katalog tampil dengan data contoh.
 2. **Buat proyek Supabase.** Masuk ke [supabase.com](https://supabase.com) dengan akun GitHub, lalu buat proyek baru. Simpan password database di tempat aman.
 3. **Siapkan database.** Di Supabase, buka **SQL Editor**, tempel seluruh isi `docs/schema.sql`, lalu klik **Run**. Tabel `produk` terbentuk tanpa produk contoh. Untuk kolom lanjutan seperti stok, harga promo, galeri, kategori, ulasan, dan analitik, jalankan juga `docs/migration-fitur-katalog.sql`.
-4. **Siapkan akun admin.** Ikuti panduan akun admin yang dibagikan mentor. Setelah itu matikan pendaftaran akun baru di **Authentication > Sign In / Providers**.
+4. **Siapkan akun admin.** Buat akun di Supabase Auth dan matikan pendaftaran akun baru di **Authentication > Sign In / Providers**. Akses admin dibatasi dengan `app_metadata.role = "admin"`; gunakan SQL Editor untuk memberi role hanya kepada UUID admin yang benar:
+
+   ```sql
+   update auth.users
+   set raw_app_meta_data = coalesce(raw_app_meta_data, '{}'::jsonb) || '{"role":"admin"}'::jsonb
+   where id = '<UUID_ADMIN_DARI_AUTH_USERS>';
+   ```
+
+   Keluar lalu login kembali agar token baru memuat role admin. Jangan memberi role ini lewat `user_metadata`.
 5. **Isi environment variable di Vercel.** Buka proyekmu di Vercel > **Settings > Environment Variables**, lalu isi tiga variabel dari `.env.example`. Nilainya ada di Supabase > **Project Settings > API**. Setelah itu lakukan **Redeploy**.
 6. **Clone repo ke laptop.**
 

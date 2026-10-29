@@ -5,9 +5,9 @@ export default function KartuProduk({ produk }) {
   return (
     <Link
       href={`/produk/${produk.id}`}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-garis bg-latar transition-all duration-300 hover:-translate-y-1 hover:border-utama/40 hover:shadow-lg active:scale-[0.98]"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-garis bg-latar shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-utama/50 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-utama active:scale-[0.98]"
     >
-      <div className="relative aspect-square w-full overflow-hidden bg-permukaan">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-permukaan sm:aspect-square">
         <img
           src={produk.foto_url || "/produk/placeholder.svg"}
           alt={produk.nama}
@@ -26,11 +26,11 @@ export default function KartuProduk({ produk }) {
         )}
       </div>
 
-      <div className="flex flex-1 flex-col gap-2 p-3.5">
+      <div className="flex flex-1 flex-col gap-2.5 p-3.5 sm:p-4">
         <h3 className="font-semibold text-sm leading-snug text-teks transition-colors duration-200 group-hover:text-utama line-clamp-2">
           {produk.nama}
         </h3>
-        <div className="mt-auto flex items-center justify-between pt-1">
+        <div className="mt-auto flex items-end justify-between gap-2 pt-1">
           <p className="rounded-md bg-harga-latar px-2.5 py-1 text-xs font-bold text-harga transition-transform duration-200 group-hover:scale-105">
             {formatRupiah(produk.harga)}
           </p>

@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PWARegister from "@/components/PWARegister";
 import { toko } from "@/lib/toko";
+import { headers } from "next/headers";
 
 export const metadata = {
   title: toko.nama,
@@ -22,7 +23,9 @@ export const viewport = {
   themeColor: "#16a34a",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  // Reads the request so nonce-based CSP is applied to dynamically rendered scripts.
+  await headers();
   return (
     <html lang="id">
       <head>

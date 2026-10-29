@@ -44,6 +44,26 @@ html.dark {
   --color-bahaya: #ff938c;
 }
 
+.hero-katalog {
+  background:
+    radial-gradient(ellipse at 90% 12%, color-mix(in srgb, var(--color-utama) 9%, transparent), transparent 36%),
+    linear-gradient(140deg, var(--color-latar) 12%, var(--color-permukaan) 100%);
+}
+
+::selection {
+  color: var(--color-latar);
+  background: var(--color-utama);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 :focus-visible {
   outline: 2px solid var(--color-utama);
   outline-offset: 2px;

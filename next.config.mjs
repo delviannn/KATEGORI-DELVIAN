@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Supaya deploy tidak gagal hanya karena error tipe kecil selama workshop.
-  typescript: { ignoreBuildErrors: true },
+  poweredByHeader: false,
+  turbopack: { root: process.cwd() },
   experimental: { serverActions: { bodySizeLimit: "6mb" } },
 
   // HTTP Security Headers untuk melindungi aplikasi dari clickjacking, XSS, dan sniffing
@@ -27,7 +27,7 @@ const nextConfig = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
           },
-          ...(production ? [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" }] : []),
+          ...(production ? [{ key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" }] : []),
         ],
       },
     ];
