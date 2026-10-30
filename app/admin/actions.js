@@ -108,16 +108,16 @@ export async function login(_prevState, formData) {
   if (!email.includes("@") || email.length > 255) {
     return { error: "Format email tidak valid." };
   }
-  if (!(await batasiPermintaan("login", 10, 900, email))) {
-    return { error: "Terlalu banyak percobaan. Tunggu 15 menit sebelum mencoba lagi." };
-  }
-
   const supabase = await buatSupabaseSesi();
 
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
+
+  if (error?.status === 429 || error?.code === "over_request_rate_limit") {
+    return { error: "Percobaan login dibatasi oleh Supabase. Tunggu beberapa menit, lalu coba lagi." };
+  }
 
   if (error || data?.user?.app_metadata?.role !== "admin") {
     await supabase.auth.signOut();
