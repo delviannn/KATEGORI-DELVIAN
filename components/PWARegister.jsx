@@ -10,7 +10,7 @@ export default function PWARegister() {
   useEffect(() => {
     // Daftarkan service worker
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+      navigator.serviceWorker.register("/sw.js", { updateViaCache: "none" }).catch(() => undefined);
     }
 
     // Tangani event install prompt PWA

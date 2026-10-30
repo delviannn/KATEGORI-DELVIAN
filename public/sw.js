@@ -1,5 +1,5 @@
 // Service Worker untuk Katalog PWA
-const CACHE_NAME = "katalog-pwa-v2";
+const CACHE_NAME = "katalog-pwa-v4";
 const OFFLINE_URL = "/offline.html";
 
 const ASSETS_TO_CACHE = [
@@ -35,18 +35,15 @@ self.addEventListener("activate", (event) => {
 
 // Fetch: Network-first dengan fallback ke cache / offline.html
 self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") return;
-
   const url = new URL(event.request.url);
 
   // Let the browser load external stylesheets, fonts, and other resources
   // directly under their resource-specific CSP directives.
   if (url.origin !== self.location.origin) return;
 
-  // Jangan cache rute admin atau API
-  if (url.pathname.startsWith("/admin") || url.pathname.startsWith("/api")) {
-    return;
-  }
+  // Jangan intersep API, rute admin, atau request selain GET. Biarkan browser
+  // mengirimnya langsung agar service worker tidak berada di jalur request.
+  if (event.request.method !== "GET" || url.pathname.startsWith("/admin") || url.pathname.startsWith("/api")) return;
 
   event.respondWith(
     fetch(event.request)

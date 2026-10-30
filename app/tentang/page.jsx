@@ -3,7 +3,15 @@ import { getSiteUrl } from "@/lib/site";
 
 export async function generateMetadata() {
   const toko = await ambilPengaturanToko();
-  return { title: `Tentang ${toko.nama}`, description: toko.tagline, alternates: { canonical: new URL("/tentang", getSiteUrl()).toString() } };
+  const url = new URL("/tentang", getSiteUrl()).toString();
+  const title = `Tentang ${toko.nama}`;
+  return {
+    title,
+    description: toko.tagline,
+    alternates: { canonical: url },
+    openGraph: { type: "website", title, description: toko.tagline, url },
+    twitter: { card: "summary", title, description: toko.tagline },
+  };
 }
 
 export default async function HalamanTentang() {

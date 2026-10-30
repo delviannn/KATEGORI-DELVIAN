@@ -355,28 +355,38 @@ Tulis dengan format:
   // 2. Integrasi Gemini API jika GEMINI_API_KEY tersedia
   const geminiKey = process.env.GEMINI_API_KEY;
   if (geminiKey) {
-    try {
-      const res = await fetch(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { maxOutputTokens: 700 },
-          }),
-          signal: AbortSignal.timeout(15000),
-          redirect: "error",
-        }
-      );
+    const model = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
+    const models = ["gemini-3.5-flash-lite", "gemini-3.8-flash"].includes(model) ? [model, "gemini-3.6-flash"] : [model];
+    for (const selectedModel of models) {
+      try {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(selectedModel)}:generateContent`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-goog-api-key": geminiKey },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { maxOutputTokens: 700, thinkingConfig: { thinkingLevel: "low" } },
+            }),
+            signal: AbortSignal.timeout(20000),
+            redirect: "error",
+          }
+        );
 
-      const data = res.ok ? await res.json() : null;
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (typeof text === "string" && text.trim()) {
-        return { hasil: text.trim().slice(0, 3000) };
+        if (!res.ok) {
+          if (res.status === 503 && selectedModel !== models.at(-1)) continue;
+          break;
+        }
+        const data = await res.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (typeof text === "string" && text.trim()) {
+          return { hasil: text.trim().slice(0, 3000) };
+        }
+        break;
+      } catch (error) {
+        if (error?.name === "TimeoutError" && selectedModel !== models.at(-1)) continue;
+        break;
       }
-    } catch {
-      // Hindari mencatat detail permintaan dari provider pihak ketiga.
     }
   }
 

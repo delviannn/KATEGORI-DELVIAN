@@ -3,7 +3,16 @@ import { getSiteUrl } from "@/lib/site";
 
 export async function generateMetadata() {
   const toko = await ambilPengaturanToko();
-  return { title: `Kontak | ${toko.nama}`, description: `Hubungi ${toko.nama} melalui WhatsApp atau kunjungi toko kami.`, alternates: { canonical: new URL("/kontak", getSiteUrl()).toString() } };
+  const url = new URL("/kontak", getSiteUrl()).toString();
+  const title = `Kontak | ${toko.nama}`;
+  const description = `Hubungi ${toko.nama} melalui WhatsApp atau kunjungi toko kami.`;
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: { type: "website", title, description, url },
+    twitter: { card: "summary", title, description },
+  };
 }
 
 export default async function HalamanKontak() {

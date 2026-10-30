@@ -13,7 +13,7 @@ export default function AsistenProduk({ produkId = null }) {
     const asked = question.trim().slice(0, 500);
     setPending(true); setError(""); setQuestion("");
     try {
-      const response = await fetch("/api/assistant", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: asked, history, productId }) });
+      const response = await fetch("/api/assistant", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: asked, history, productId: produkId }) });
       let result;
       try {
         result = await response.json();
@@ -31,9 +31,10 @@ export default function AsistenProduk({ produkId = null }) {
       } else {
         setHistory((old) => [...old, { role: "user", content: asked }, { role: "assistant", content: result.answer }].slice(-8));
       }
-    } catch {
+    } catch (error) {
       setQuestion(asked);
-      setError("Browser gagal terhubung ke /api/assistant. Muat ulang halaman dan coba lagi.");
+      const detail = error instanceof Error ? `${error.name}: ${error.message}` : "Unknown error";
+      setError(`Browser gagal terhubung ke /api/assistant (${detail}). Muat ulang halaman dan coba lagi.`);
     }
     finally { setPending(false); }
   }
