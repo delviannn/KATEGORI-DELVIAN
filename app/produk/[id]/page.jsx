@@ -54,6 +54,8 @@ export default async function HalamanDetailProduk({ params }) {
     notFound();
   }
 
+  const { data: ulasan } = await supabase.from("ulasan").select("nama,rating,isi,created_at").eq("produk_id", produk.id).eq("status", "disetujui").order("created_at", { ascending: false }).limit(20);
+
   return (
     <article className="grid gap-8 py-8 md:grid-cols-2 md:py-12">
       <script type="application/ld+json" nonce={requestHeaders.get("x-nonce") || undefined}>{JSON.stringify({ "@context": "https://schema.org", "@type": "Product", name: produk.nama, description: produk.deskripsi || undefined, image: produk.foto_url ? [produk.foto_url, ...(produk.foto_lainnya || [])] : undefined, category: produk.kategori || undefined, offers: { "@type": "Offer", priceCurrency: "IDR", price: produk.harga, availability: produk.stok > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock", url: new URL(`/produk/${id}`, getSiteUrl()).toString() } }).replaceAll("<", "\\u003c")}</script>
@@ -100,7 +102,7 @@ export default async function HalamanDetailProduk({ params }) {
         <ProdukTerkait id={produk.id} kategori={produk.kategori} />
       </section>
       <section className="md:col-span-2 border-t border-garis pt-6">
-        <UlasanProduk id={produk.id} />
+        <UlasanProduk id={produk.id} ulasan={ulasan || []} />
       </section>
       <div className="md:col-span-2"><AsistenProduk produkId={produk.id} /></div>
     </article>
