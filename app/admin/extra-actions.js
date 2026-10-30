@@ -54,6 +54,11 @@ export async function hapusKategori(idRaw) {
   if (!auth) return { error: "Sesi admin tidak valid." };
   const id = Number(idRaw);
   if (!Number.isSafeInteger(id) || id < 1) return { error: "ID kategori tidak valid." };
+  const { data: category, error: categoryError } = await auth.client.from("kategori").select("nama").eq("id", id).maybeSingle();
+  if (categoryError || !category) return { error: "Kategori tidak ditemukan." };
+  const { count: used, error: productError } = await auth.client.from("produk").select("id", { count: "exact", head: true }).eq("kategori", category.nama);
+  if (productError) return { error: "Pemakaian kategori tidak dapat diverifikasi." };
+  if (used > 0) return { error: "Kategori masih dipakai produk. Ubah kategori produk tersebut terlebih dahulu." };
   const { error } = await auth.client.from("kategori").delete().eq("id", id);
   if (error) return { error: "Kategori masih dipakai produk atau gagal dihapus. Pindahkan produknya terlebih dahulu." };
   await logAction(auth.user, "hapus_kategori", "kategori", id);
@@ -216,7 +221,13 @@ export async function ubahStatusAkunAdmin(_prev, formData) {
     const admins = (data?.users || []).filter((user) => user.app_metadata?.role === "admin" && (!user.banned_until || new Date(user.banned_until) <= new Date()));
     if (admins.length <= 1) return { error: "Akun admin aktif terakhir tidak dapat dinonaktifkan." };
   }
-  const { error } = await service.auth.admin.updateUserById(id, { ban_duration: aktif ? "none" : "876000h" });
+  const { data: target, error: lookupError } = await service.auth.admin.getUserById(id);
+  if (lookupError || !["admin", "disabled"].includes(target?.user?.app_metadata?.role)) return { error: "Akun tersebut bukan akun admin yang dapat dikelola." };
+  if (!aktif && target.user.app_metadata.role !== "admin") return { error: "Akun admin ini sudah nonaktif." };
+  const { error } = await service.auth.admin.updateUserById(id, {
+    app_metadata: { ...target.user.app_metadata, role: aktif ? "admin" : "disabled" },
+    ban_duration: aktif ? "none" : "876000h",
+  });
   if (error) return { error: "Status akun gagal diperbarui." };
   await logAction(auth.user, aktif ? "aktifkan_akun_admin" : "nonaktifkan_akun_admin", "auth_user", id);
   revalidatePath("/admin/akun");

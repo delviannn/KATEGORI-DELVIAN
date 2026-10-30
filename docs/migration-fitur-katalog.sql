@@ -4,10 +4,15 @@ create or replace function public.is_admin()
 returns boolean
 language sql
 stable
-security invoker
+security definer
 set search_path = ''
 as $$
-  select coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') = 'admin';
+  select exists (
+    select 1 from auth.users u
+    where u.id = auth.uid()
+      and coalesce(u.raw_app_meta_data ->> 'role', '') = 'admin'
+      and (u.banned_until is null or u.banned_until <= now())
+  );
 $$;
 revoke all on function public.is_admin() from public, anon;
 grant execute on function public.is_admin() to authenticated;

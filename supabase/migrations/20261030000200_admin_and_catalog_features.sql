@@ -16,6 +16,23 @@ alter table public.pengaturan_toko
   add column if not exists promo_tautan text,
   add column if not exists diperbarui_at timestamptz not null default now();
 
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1 from auth.users u
+    where u.id = auth.uid()
+      and coalesce(u.raw_app_meta_data ->> 'role', '') = 'admin'
+      and (u.banned_until is null or u.banned_until <= now())
+  );
+$$;
+revoke all on function public.is_admin() from public, anon;
+grant execute on function public.is_admin() to authenticated;
+
 create or replace function public.sinkronkan_kategori_produk()
 returns trigger
 language plpgsql
