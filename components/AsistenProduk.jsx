@@ -14,10 +14,27 @@ export default function AsistenProduk({ produkId = null }) {
     setPending(true); setError(""); setQuestion("");
     try {
       const response = await fetch("/api/assistant", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: asked, history, productId }) });
-      const result = await response.json();
-      if (!response.ok) setError(result.error || "Asisten tidak dapat menjawab.");
-      else setHistory((old) => [...old, { role: "user", content: asked }, { role: "assistant", content: result.answer }].slice(-8));
-    } catch { setError("Asisten tidak dapat dijangkau. Coba lagi."); }
+      let result;
+      try {
+        result = await response.json();
+      } catch {
+        setQuestion(asked);
+        setError(`Server mengirim respons yang tidak valid (HTTP ${response.status}).`);
+        return;
+      }
+      if (!response.ok) {
+        setQuestion(asked);
+        setError(result.error || `Asisten gagal menjawab (HTTP ${response.status}).`);
+      } else if (typeof result.answer !== "string" || !result.answer.trim()) {
+        setQuestion(asked);
+        setError("Server tidak mengirim jawaban yang valid. Coba lagi.");
+      } else {
+        setHistory((old) => [...old, { role: "user", content: asked }, { role: "assistant", content: result.answer }].slice(-8));
+      }
+    } catch {
+      setQuestion(asked);
+      setError("Browser gagal terhubung ke /api/assistant. Muat ulang halaman dan coba lagi.");
+    }
     finally { setPending(false); }
   }
   return <section className="mt-8 rounded-2xl border border-garis bg-permukaan p-4 sm:p-6"><h2 className="text-lg font-bold">Tanya asisten produk</h2><p className="mt-1 text-sm text-teks-lembut">Jawaban menggunakan informasi katalog. Pastikan harga dan stok saat memesan.</p>
