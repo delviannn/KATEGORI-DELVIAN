@@ -1,0 +1,308 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard - MY SHOP</title>
+    <!-- Import Bootstrap External (CDN) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome External (CDN) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- External Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Top Navbar Dashboard -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand text-white fw-bold" href="dashboard.html">
+                <i class="fas fa-tachometer-alt me-2"></i>DASHBOARD ADMIN
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item me-3">
+                        <a class="nav-link text-white position-relative" href="#" onclick="alert('Anda memiliki 3 notifikasi pesanan baru!');">
+                            <i class="fas fa-bell"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">3</span>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle fa-lg me-2"></i>
+                            <span>Delvian Permana</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="navbarDropdown">
+                            <li><h6 class="dropdown-header">Administrator</h6></li>
+                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#profilModal"><i class="fas fa-user me-2 text-secondary"></i>Profil Saya</a></li>
+                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#pengaturanModal"><i class="fas fa-cog me-2 text-secondary"></i>Pengaturan</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="loginform.html"><i class="fas fa-sign-out-alt me-2"></i>Keluar</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flex Main Container -->
+    <div class="d-flex">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar bg-secondary p-3" style="width: 250px; flex-shrink: 0;">
+            <h5 class="fw-bold pb-2 border-bottom border-light">Menu Utama</h5>
+            <ul class="nav flex-column gap-1">
+                <li class="nav-item">
+                    <a class="nav-link active" href="dashboard.html">
+                        <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="layout.html">
+                        <i class="fas fa-box me-2"></i> Produk Toko
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#section-pelanggan">
+                        <i class="fas fa-users me-2"></i> Pelanggan
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="layout.html">
+                        <i class="fas fa-store me-2"></i> Ke Halaman Toko
+                    </a>
+                </li>
+                <li class="nav-item mt-4 pt-3 border-top border-light">
+                    <a class="nav-link text-warning" href="loginform.html">
+                        <i class="fas fa-power-off me-2"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content Dashboard -->
+        <div class="container-fluid p-4" >
+            <!-- Alert Component -->
+            <div class="alert alert-secondary alert-dismissible fade show shadow-sm" role="alert">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Selamat Datang di Dashboard, Delvian!</strong> Anda dapat mengelola transaksi, memantau produk, dan melihat ringkasan aktivitas toko.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- Kartu Statistik (Komponen Cards Berbeda) -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-secondary text-white shadow-sm h-100">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase mb-1 small fw-bold">Total Penjualan</h6>
+                                <h3 class="fw-bold mb-0">Rp 18.4 Jt</h3>
+                            </div>
+                            <i class="fas fa-wallet fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white shadow-sm h-100">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase mb-1 small fw-bold">Total Produk</h6>
+                                <h3 class="fw-bold mb-0">128 Item</h3>
+                            </div>
+                            <i class="fas fa-boxes fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-dark shadow-sm h-100">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase mb-1 small fw-bold">Pelanggan Aktif</h6>
+                                <h3 class="fw-bold mb-0">542 Orang</h3>
+                            </div>
+                            <i class="fas fa-user-friends fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-danger text-white shadow-sm h-100">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-uppercase mb-1 small fw-bold">Pesanan Baru</h6>
+                                <h3 class="fw-bold mb-0">15 Pending</h3>
+                            </div>
+                            <i class="fas fa-shopping-bag fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Target -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="fw-bold small">Pencapaian Target Penjualan Bulan Ini (80%)</span>
+                        <span class="fw-bold small text-success">Rp 18.400.000 / Rp 23.000.000</span>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 80%" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabel Transaksi Terbaru (Komponen Table Bootstrap) -->
+            <div id="section-pelanggan" class="card shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-list-alt me-2 text-secondary"></i>Daftar Transaksi Pesanan Terbaru</h5>
+                    <a href="layout.html" class="btn btn-sm btn-outline-secondary"><i class="fas fa-plus me-1"></i>Tambah Produk Baru</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle mb-0">
+                            <thead class="table-dark">
+                                <tr class="text-center">
+                                    <th>No</th>
+                                    <th>ID Pesanan</th>
+                                    <th>Nama Pelanggan</th>
+                                    <th>Produk</th>
+                                    <th>Total Bayar</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-center">1</td>
+                                    <td><span class="badge bg-secondary">#ORD-901</span></td>
+                                    <td>Sakha Absyar</td>
+                                    <td>Headphone Wireless Bass</td>
+                                    <td>Rp 450.000</td>
+                                    <td class="text-center"><span class="badge bg-success">Selesai</span></td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-info text-white" onclick="alert('Detail Pesanan #ORD-901');"><i class="fas fa-eye"></i></button>
+                                        <button class="btn btn-sm btn-danger" onclick="alert('Pesanan dibatalkan');"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">2</td>
+                                    <td><span class="badge bg-secondary">#ORD-902</span></td>
+                                    <td>Tiffany Lasmaria</td>
+                                    <td>Mouse Gaming RGB</td>
+                                    <td>Rp 180.000</td>
+                                    <td class="text-center"><span class="badge bg-warning text-dark">Diproses</span></td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-info text-white" onclick="alert('Detail Pesanan #ORD-902');"><i class="fas fa-eye"></i></button>
+                                        <button class="btn btn-sm btn-danger" onclick="alert('Pesanan dibatalkan');"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">3</td>
+                                    <td><span class="badge bg-secondary">#ORD-903</span></td>
+                                    <td>Fridho Yudhistira</td>
+                                    <td>Keyboard Mechanical</td>
+                                    <td>Rp 250.000</td>
+                                    <td class="text-center"><span class="badge bg-success">Selesai</span></td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-info text-white" onclick="alert('Detail Pesanan #ORD-903');"><i class="fas fa-eye"></i></button>
+                                        <button class="btn btn-sm btn-danger" onclick="alert('Pesanan dibatalkan');"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">4</td>
+                                    <td><span class="badge bg-secondary">#ORD-904</span></td>
+                                    <td>Ardyan Saputra</td>
+                                    <td>Smartwatch Sport Fit</td>
+                                    <td>Rp 320.000</td>
+                                    <td class="text-center"><span class="badge bg-secondary">Dikirim</span></td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-info text-white" onclick="alert('Detail Pesanan #ORD-904');"><i class="fas fa-eye"></i></button>
+                                        <button class="btn btn-sm btn-danger" onclick="alert('Pesanan dibatalkan');"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
+                    <span class="small text-muted">Menampilkan 4 dari 24 transaksi</span>
+                    <!-- Komponen Pagination -->
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item disabled"><a class="page-link" href="#">Sebelumnya</a></li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">Berikutnya</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Dashboard -->
+    <div class="footer text-center bg-secondary text-white py-3">
+        <small>&copy; 2026 Praktikum 7 Bootstrap Layout - Dikembangkan oleh <strong>Delvian Permana Putra (NIM: 3312601112)</strong></small>
+    </div>
+
+    <!-- Modal Profil -->
+    <div class="modal fade" id="profilModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-secondary text-white">
+                    <h5 class="modal-title"><i class="fas fa-user-circle me-2"></i>Profil Pengguna</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <i class="fas fa-user-shield fa-4x text-secondary mb-3"></i>
+                    <h5 class="fw-bold">Delvian Permana Putra</h5>
+                    <p class="text-muted mb-1">NIM: 3312601112</p>
+                    <span class="badge bg-success">Administrator Utama</span>
+                    <hr>
+                    <p class="small text-muted">Program Studi D4 Teknik Informatika - Politeknik Negeri Batam</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Pengaturan -->
+    <div class="modal fade" id="pengaturanModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-secondary text-white">
+                    <h5 class="modal-title"><i class="fas fa-cog me-2"></i>Pengaturan Akun</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nama Toko</label>
+                        <input type="text" class="form-control" value="MY SHOP Official">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Email Kontak</label>
+                        <input type="email" class="form-control" value="admin@myshop.co.id">
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" checked>
+                        <label class="form-check-label" for="flexSwitchCheckDefault">Aktifkan Notifikasi Transaksi Baru</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="alert('Pengaturan berhasil disimpan!');">Simpan Perubahan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Bootstrap JS External (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+
+
