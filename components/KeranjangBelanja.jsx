@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { toko } from "@/lib/toko";
 import { formatRupiah } from "@/lib/format";
 
 const CART_KEY = "katalog:keranjang:v1";
@@ -21,7 +20,7 @@ export function simpanKeKeranjang(item) {
   }
 }
 
-export default function KeranjangBelanja() {
+export default function KeranjangBelanja({ nomorWhatsApp }) {
   const [items, setItems] = useState([]);
   useEffect(() => {
     const update = () => {
@@ -41,6 +40,6 @@ export default function KeranjangBelanja() {
   if (!items.length) return null;
   const totalItems = items.reduce((total, item) => total + item.jumlah, 0);
   const text = ["Halo, saya ingin memesan produk berikut:", ...items.map((item) => `\n- ${item.nama}${item.varian ? ` (${item.varian})` : ""} × ${item.jumlah} = ${formatRupiah(item.harga * item.jumlah)}`)].join("");
-  const href = `https://wa.me/${toko.nomorWhatsApp}?text=${encodeURIComponent(text)}`;
+  const href = `https://wa.me/${nomorWhatsApp}?text=${encodeURIComponent(text)}`;
   return <a href={href} target="_blank" rel="noopener noreferrer" aria-label={`Pesan ${totalItems} barang di keranjang melalui WhatsApp`} className="rounded-lg bg-utama px-3 py-2 text-sm font-semibold text-white">Keranjang ({totalItems}) · Pesan</a>;
 }

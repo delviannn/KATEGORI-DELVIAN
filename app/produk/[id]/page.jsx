@@ -6,6 +6,10 @@ import { formatRupiah } from "@/lib/format";
 import { getSiteUrl } from "@/lib/site";
 import GaleriProduk from "@/components/GaleriProduk";
 import InteraksiProduk from "@/components/InteraksiProduk";
+import FormUlasan from "@/components/FormUlasan";
+import { ambilPengaturanToko } from "@/lib/pengaturan-toko";
+import AsistenProduk from "@/components/AsistenProduk";
+import { headers } from "next/headers";
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
@@ -37,6 +41,8 @@ export default async function HalamanDetailProduk({ params }) {
   const { id } = await params;
 
   const supabase = buatSupabaseServer();
+  const toko = await ambilPengaturanToko();
+  const requestHeaders = await headers();
   const { data: produk, error } = await supabase
     .from("produk")
     .select("id, nama, harga, harga_coret, stok, aktif, varian, deskripsi, foto_url, foto_lainnya, kategori")
@@ -50,17 +56,21 @@ export default async function HalamanDetailProduk({ params }) {
 
   return (
     <article className="grid gap-8 py-8 md:grid-cols-2 md:py-12">
+      <script type="application/ld+json" nonce={requestHeaders.get("x-nonce") || undefined}>{JSON.stringify({ "@context": "https://schema.org", "@type": "Product", name: produk.nama, description: produk.deskripsi || undefined, image: produk.foto_url ? [produk.foto_url, ...(produk.foto_lainnya || [])] : undefined, category: produk.kategori || undefined, offers: { "@type": "Offer", priceCurrency: "IDR", price: produk.harga, availability: produk.stok > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock", url: new URL(`/produk/${id}`, getSiteUrl()).toString() } }).replaceAll("<", "\\u003c")}</script>
       <div className="flex flex-col gap-6">
         <GaleriProduk nama={produk.nama} foto={[produk.foto_url || "/produk/placeholder.svg", ...(produk.foto_lainnya || [])]} />
         <InteraksiProduk produk={produk} />
       </div>
       <div className="flex flex-col gap-4">
+        <nav aria-label="Breadcrumb">
         <Link
           href="/"
           className="text-sm text-teks-lembut underline underline-offset-4 hover:text-utama"
         >
           ← Kembali ke katalog
         </Link>
+        <span aria-hidden="true" className="mx-2">/</span><span aria-current="page">{produk.nama}</span>
+        </nav>
         <div>
           <span className="rounded-md bg-permukaan px-2.5 py-1 text-xs font-semibold text-teks-lembut border border-garis">
             {produk.kategori || "Umum"}
@@ -82,15 +92,30 @@ export default async function HalamanDetailProduk({ params }) {
 
         {/* US-12: Pilihan Varian dan Jumlah Pesanan */}
         <div className="border-t border-garis pt-4">
-          {produk.stok > 0 && <PilihanPesanan produk={produk} />}
+          {produk.stok > 0 && <PilihanPesanan produk={produk} nomorWhatsApp={toko.nomorWhatsApp} />}
         </div>
       </div>
       <section className="md:col-span-2 border-t border-garis pt-6">
         <h2 className="text-xl font-bold">Produk lainnya</h2>
         <ProdukTerkait id={produk.id} kategori={produk.kategori} />
       </section>
+      <section className="md:col-span-2 border-t border-garis pt-6">
+        <UlasanProduk id={produk.id} />
+      </section>
+      <div className="md:col-span-2"><AsistenProduk produkId={produk.id} /></div>
     </article>
   );
+}
+
+async function UlasanProduk({ id }) {
+  const supabase = buatSupabaseServer();
+  const { data: ulasan } = await supabase.from("ulasan").select("nama,rating,isi,created_at").eq("produk_id", id).eq("status", "disetujui").order("created_at", { ascending: false }).limit(20);
+  const jumlah = ulasan?.length || 0;
+  const rata = jumlah ? (ulasan.reduce((sum, item) => sum + item.rating, 0) / jumlah).toFixed(1) : null;
+  return <div><h2 className="text-xl font-bold">Ulasan pelanggan{rata && <span className="ml-2 text-sm font-semibold text-amber-600">★ {rata} ({jumlah})</span>}</h2>
+    {ulasan?.length ? <div className="mt-4 grid gap-3 sm:grid-cols-2">{ulasan.map((item, index) => <article key={`${item.created_at}-${index}`} className="rounded-xl border border-garis p-4"><p className="font-semibold">{item.nama} <span className="text-amber-600">{"★".repeat(item.rating)}</span></p><p className="mt-2 whitespace-pre-line text-sm text-teks-lembut">{item.isi}</p></article>)}</div> : <p className="mt-2 text-sm text-teks-lembut">Belum ada ulasan yang disetujui.</p>}
+    <h3 className="mt-6 font-bold">Tulis ulasan</h3><FormUlasan produkId={id} />
+  </div>;
 }
 
 async function ProdukTerkait({ id, kategori }) {

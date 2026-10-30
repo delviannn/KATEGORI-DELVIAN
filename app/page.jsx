@@ -1,8 +1,9 @@
 ﻿import KartuProduk from "@/components/KartuProduk";
 import FilterKatalog from "@/components/FilterKatalog";
 import Link from "next/link";
-import { toko } from "@/lib/toko";
+import { ambilPengaturanToko } from "@/lib/pengaturan-toko";
 import { buatSupabaseServer } from "@/lib/supabase";
+import AsistenProduk from "@/components/AsistenProduk";
 
 // US-01 & US-11: katalog produk dengan pencarian dan filter kategori
 export default async function HalamanKatalog({ searchParams }) {
@@ -26,6 +27,7 @@ export default async function HalamanKatalog({ searchParams }) {
   const ukuranHalaman = 12;
 
   const supabase = buatSupabaseServer();
+  const toko = await ambilPengaturanToko();
 
   // Query produk dengan filter pencarian dan kategori
   let query = supabase
@@ -68,6 +70,11 @@ export default async function HalamanKatalog({ searchParams }) {
 
   return (
     <>
+      {toko.promoAktif && toko.bannerJudul && <section className="relative mb-6 overflow-hidden rounded-2xl border border-utama/20 bg-utama/5 p-5 sm:p-7">
+        {toko.bannerFoto && <img src={toko.bannerFoto} alt="" loading="lazy" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-15" />}
+        <h2 className="text-xl font-extrabold text-teks">{toko.promoTautan ? <Link href={toko.promoTautan}>{toko.bannerJudul}</Link> : toko.bannerJudul}</h2>
+        {toko.bannerDeskripsi && <p className="mt-2 max-w-2xl text-sm text-teks-lembut">{toko.bannerDeskripsi}</p>}
+      </section>}
       <section className="hero-katalog relative isolate mt-6 overflow-hidden rounded-[2rem] border border-garis px-6 py-10 shadow-sm sm:mt-9 sm:px-10 sm:py-14">
         <div aria-hidden="true" className="pointer-events-none absolute -right-16 -top-20 -z-10 h-72 w-72 rounded-full bg-utama/10 blur-3xl" />
         <div aria-hidden="true" className="pointer-events-none absolute -bottom-28 right-1/3 -z-10 h-64 w-64 rounded-full bg-harga-latar/70 blur-3xl" />
@@ -88,6 +95,7 @@ export default async function HalamanKatalog({ searchParams }) {
         </div>
       </section>
 
+      <AsistenProduk />
       <section id="produk" aria-labelledby="judul-produk" className="flex scroll-mt-24 flex-col gap-6 py-10 sm:py-14">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>

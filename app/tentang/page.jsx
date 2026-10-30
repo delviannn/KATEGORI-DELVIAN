@@ -1,8 +1,13 @@
-import { toko } from "@/lib/toko";
+import { ambilPengaturanToko } from "@/lib/pengaturan-toko";
+import { getSiteUrl } from "@/lib/site";
 
-export const metadata = { title: `Tentang ${toko.nama}`, description: toko.tagline };
+export async function generateMetadata() {
+  const toko = await ambilPengaturanToko();
+  return { title: `Tentang ${toko.nama}`, description: toko.tagline, alternates: { canonical: new URL("/tentang", getSiteUrl()).toString() } };
+}
 
-export default function HalamanTentang() {
+export default async function HalamanTentang() {
+  const toko = await ambilPengaturanToko();
   return <article className="max-w-prose py-12">
     <p className="text-sm font-semibold text-utama">Cerita kami</p>
     <h1 className="mt-2 text-3xl font-extrabold">Tentang {toko.nama}</h1>

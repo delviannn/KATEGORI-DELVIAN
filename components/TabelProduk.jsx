@@ -1,6 +1,8 @@
 import { formatRupiah } from "@/lib/format";
 import Tombol from "@/components/Tombol";
 import TombolHapusProduk from "@/components/TombolHapusProduk";
+import FormUrutan from "@/components/FormUrutan";
+import { ubahUrutanProduk } from "@/app/admin/extra-actions";
 
 /**
  * @typedef {Object} Produk
@@ -59,6 +61,7 @@ export default function TabelProduk({ daftarProduk }) {
             <th className="px-4 py-3 font-semibold">Harga</th>
             <th className="px-4 py-3 font-semibold">Stok</th>
             <th className="px-4 py-3 font-semibold">Status</th>
+            <th className="px-4 py-3 font-semibold">Urutan</th>
             <th className="px-4 py-3 font-semibold text-right">
               <span className="sr-only">Aksi</span>
             </th>
@@ -89,6 +92,7 @@ export default function TabelProduk({ daftarProduk }) {
                   {produk.aktif === false ? "Nonaktif" : "Aktif"}
                 </span>
               </td>
+              <td className="px-4 py-3"><FormUrutan id={produk.id} urutan={produk.urutan} action={ubahUrutanProduk} /></td>
               <td className="px-4 py-3">
                 <div className="flex justify-end gap-2">
                   <Tombol href={`/admin/produk/${produk.id}/ubah`} varian="garis">

@@ -3,6 +3,8 @@ import Link from "next/link";
 import KartuProduk from "@/components/KartuProduk";
 import { buatSupabaseServer } from "@/lib/supabase";
 import { getSiteUrl } from "@/lib/site";
+import { headers } from "next/headers";
+import { ambilPengaturanToko } from "@/lib/pengaturan-toko";
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -22,6 +24,7 @@ export default async function HalamanKategori({ params, searchParams }) {
   const halaman = Math.max(1, Math.min(10000, Number.parseInt(queryParams.halaman, 10) || 1));
   const ukuranHalaman = 12;
   const supabase = buatSupabaseServer();
+  const requestHeaders = await headers();
   const { data: kategori, error } = await supabase.from("kategori").select("nama, slug").eq("slug", slug).maybeSingle();
   if (error || !kategori) notFound();
   const { data: produk, error: productError, count } = await supabase
@@ -33,7 +36,11 @@ export default async function HalamanKategori({ params, searchParams }) {
     .order("created_at", { ascending: false })
     .range((halaman - 1) * ukuranHalaman, halaman * ukuranHalaman - 1);
 
+  const toko = await ambilPengaturanToko();
+  const breadcrumb = { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: toko.nama, item: getSiteUrl().toString() }, { "@type": "ListItem", position: 2, name: kategori.nama, item: new URL(`/kategori/${encodeURIComponent(slug)}`, getSiteUrl()).toString() }] };
   return <section className="py-10">
+    <script type="application/ld+json" nonce={requestHeaders.get("x-nonce") || undefined}>{JSON.stringify(breadcrumb).replaceAll("<", "\\u003c")}</script>
+    <nav aria-label="Breadcrumb"><Link href="/">Beranda</Link><span aria-hidden="true"> / </span><span aria-current="page">{kategori.nama}</span></nav>
     <a href="/" className="text-sm text-utama hover:underline">← Semua produk</a>
     <h1 className="mt-3 text-3xl font-extrabold">{kategori.nama}</h1>
     {productError ? <p className="mt-6 rounded-lg border border-garis p-4">Katalog kategori belum dapat dimuat.</p> : produk?.length ? <>

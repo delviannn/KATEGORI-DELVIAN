@@ -13,6 +13,11 @@ export default function NavAdmin() {
       <Link href="/admin/log" className="font-semibold hover:text-utama">
         Aktivitas admin
       </Link>
+      <Link href="/admin/kategori" className="font-semibold hover:text-utama">Kategori</Link>
+      <Link href="/admin/ulasan" className="font-semibold hover:text-utama">Ulasan</Link>
+      <Link href="/admin/pengaturan" className="font-semibold hover:text-utama">Pengaturan toko</Link>
+      <Link href="/admin/akun" className="font-semibold hover:text-utama">Akun</Link>
+      <Link href="/admin/impor" className="font-semibold hover:text-utama">CSV</Link>
       <form action={keluar} className="ml-auto">
         <button type="submit" className="text-teks-lembut hover:text-bahaya">
           Keluar

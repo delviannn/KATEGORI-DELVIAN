@@ -28,6 +28,9 @@ export default async function HalamanAdmin({ searchParams }) {
     supabase.rpc("admin_produk_populer"),
   ]);
   const ringkasan = ringkasanRows?.[0];
+  const popularIds = (populerRows || []).map(({ produk_id }) => produk_id);
+  const { data: popularProducts } = popularIds.length ? await supabase.from("produk").select("id,nama").in("id", popularIds) : { data: [] };
+  const productNames = new Map((popularProducts || []).map((product) => [product.id, product.nama]));
   const produkPalingDiminati = (populerRows || []).map(({ produk_id, jumlah_klik }) => [produk_id, jumlah_klik]);
 
   return (
@@ -37,6 +40,7 @@ export default async function HalamanAdmin({ searchParams }) {
         <h1 className="text-2xl font-extrabold text-teks">Produk</h1>
         {/* US-08 (bonus): tambah produk */}
         <Tombol href="/admin/produk/baru">Tambah produk</Tombol>
+        <Link href="/admin/impor" className="rounded-lg border border-garis px-4 py-2 text-sm font-semibold">Impor / ekspor CSV</Link>
       </div>
 
       <section aria-label="Ringkasan toko" className="grid gap-3 sm:grid-cols-3">
@@ -49,7 +53,7 @@ export default async function HalamanAdmin({ searchParams }) {
       {(ringkasanError || populerError) && <p role="status" className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">Statistik belum tersedia. Pastikan migration katalog terbaru sudah dijalankan di Supabase.</p>}
       <section className="rounded-xl border border-garis p-4">
         <h2 className="font-bold">Produk paling sering dipesan</h2>
-        {produkPalingDiminati.length ? <ol className="mt-2 list-inside list-decimal text-sm text-teks-lembut">{produkPalingDiminati.map(([id, total]) => <li key={id}>Produk #{id} · {total} klik WhatsApp</li>)}</ol> : <p className="mt-2 text-sm text-teks-lembut">Belum ada klik pemesanan.</p>}
+        {produkPalingDiminati.length ? <ol className="mt-2 list-inside list-decimal text-sm text-teks-lembut">{produkPalingDiminati.map(([id, total]) => <li key={id}><Link href={`/produk/${id}`} className="hover:text-utama">{productNames.get(id) || `Produk #${id}`}</Link> · {total} klik WhatsApp</li>)}</ol> : <p className="mt-2 text-sm text-teks-lembut">Belum ada klik pemesanan.</p>}
       </section>
 
       <form method="get" className="flex gap-2">

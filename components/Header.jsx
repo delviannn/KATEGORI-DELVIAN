@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { toko } from "@/lib/toko";
 import ThemeToggle from "@/components/ThemeToggle";
 import KeranjangBelanja from "@/components/KeranjangBelanja";
 
-export default function Header() {
+export default function Header({ toko }) {
   return (
     <header className="sticky top-0 z-40 border-b border-garis bg-latar/80 backdrop-blur-md transition-colors">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3.5">
@@ -25,9 +24,12 @@ export default function Header() {
           <nav aria-label="Navigasi utama" className="hidden items-center gap-3 text-sm sm:flex">
             <Link href="/tentang" className="text-teks-lembut hover:text-utama">Tentang</Link>
             <Link href="/kontak" className="text-teks-lembut hover:text-utama">Kontak</Link>
+            <Link href="/favorit" className="text-teks-lembut hover:text-utama">Favorit</Link>
+            <Link href="/terakhir-dilihat" className="text-teks-lembut hover:text-utama">Dilihat</Link>
+            <Link href="/bandingkan" className="text-teks-lembut hover:text-utama">Bandingkan</Link>
           </nav>
           <ThemeToggle />
-          <KeranjangBelanja />
+          <KeranjangBelanja nomorWhatsApp={toko.nomorWhatsApp} />
           <span className="hidden items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 md:inline-flex">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             Siap Dipesan

@@ -8,7 +8,7 @@ Template workshop vibe coding Creative Hub App Talent (CHAT) 2026. Repo ini beri
 
 1. **Salin repo ke akun GitHub-mu.** Klik tombol **Deploy with Vercel** di atas. Vercel akan membuat repo baru di akun GitHub-mu dan langsung men-deploy-nya. Setelah selesai, buka link Vercel-mu: katalog tampil dengan data contoh.
 2. **Buat proyek Supabase.** Masuk ke [supabase.com](https://supabase.com) dengan akun GitHub, lalu buat proyek baru. Simpan password database di tempat aman.
-3. **Siapkan database.** Di Supabase, buka **SQL Editor**, tempel seluruh isi `docs/schema.sql`, lalu klik **Run**. Tabel `produk` terbentuk tanpa produk contoh. Untuk kolom lanjutan seperti stok, harga promo, galeri, kategori, ulasan, dan analitik, jalankan juga `docs/migration-fitur-katalog.sql`.
+3. **Siapkan database.** Migration berurutan ada di `supabase/migrations`. Pasang Supabase CLI, jalankan `supabase login`, `supabase link --project-ref <PROJECT_REF>`, lalu `supabase db push`. Jika memakai SQL Editor, jalankan file migration berdasarkan urutan timestamp. Migration memperbarui relasi kategori, ulasan, statistik, pengaturan toko, rate limit, dan policy Storage/RLS.
 4. **Siapkan akun admin.** Buat akun di Supabase Auth dan matikan pendaftaran akun baru di **Authentication > Sign In / Providers**. Akses admin dibatasi dengan `app_metadata.role = "admin"`; gunakan SQL Editor untuk memberi role hanya kepada UUID admin yang benar:
 
    ```sql
@@ -18,7 +18,7 @@ Template workshop vibe coding Creative Hub App Talent (CHAT) 2026. Repo ini beri
    ```
 
    Keluar lalu login kembali agar token baru memuat role admin. Jangan memberi role ini lewat `user_metadata`.
-5. **Isi environment variable di Vercel.** Buka proyekmu di Vercel > **Settings > Environment Variables**, lalu isi tiga variabel Supabase dari `.env.example` dan `SITE_URL` dengan domain produksi kanonis. Isi `OPENAI_API_KEY` atau `GEMINI_API_KEY` hanya jika generator deskripsi AI digunakan. Setelah itu lakukan **Redeploy**.
+5. **Isi environment variable di Vercel.** Buka proyekmu di Vercel > **Settings > Environment Variables**, lalu isi tiga variabel Supabase dari `.env.example` dan `SITE_URL` dengan domain produksi kanonis. Tambahkan `OPENAI_API_KEY` atau `GEMINI_API_KEY` untuk mengaktifkan generator deskripsi dan asisten tanya jawab. Setelah mengubah environment variable, lakukan **Redeploy**.
 6. **Clone repo ke laptop.**
 
    ```bash
@@ -73,7 +73,7 @@ Urutan yang disarankan: US-01, US-02, US-03, US-04, US-05, US-06, lalu fitur bon
 - Jangan menyimpan kunci atau password di kode, dan jangan push file `.env.local`.
 - Jangan memberi awalan `NEXT_PUBLIC_` pada environment variable.
 - Isi `PROMPTS.md` setiap menyelesaikan fitur.
-- Setelah pembaruan aplikasi yang menambah kolom, fungsi, trigger, atau indeks, jalankan ulang `docs/migration-fitur-katalog.sql` di Supabase sebelum deploy.
+- Setelah pembaruan aplikasi yang menambah kolom, fungsi, trigger, atau indeks, jalankan migration baru di Supabase sebelum memakai fitur terkait di production.
 
 ## Sebelum mengumpulkan
 

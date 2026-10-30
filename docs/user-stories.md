@@ -97,3 +97,113 @@ Sebagai pengunjung, saya ingin memasang katalog di layar HP seperti aplikasi. Ik
 Sebagai admin, saya ingin membuat deskripsi produk secara otomatis dengan AI (Gemini API) dari nama dan kategori produk.
 
 Catatan: bonus US-08, US-09, dan US-10 hanya dihitung jika aksinya terlindungi login.
+
+## User stories lanjutan
+
+### US-15 Urutkan produk
+Pengunjung dapat mengurutkan katalog berdasarkan terbaru, harga naik/turun, dan urutan pilihan toko.
+
+### US-16 Paginasi
+Katalog publik, halaman kategori, dan daftar admin memuat data dalam halaman terbatas.
+
+### US-17 Produk terkait
+Halaman detail menampilkan produk aktif dari kategori yang sama.
+
+### US-18 Galeri beberapa foto produk
+Admin dapat menyimpan foto tambahan dan pengunjung dapat memilihnya di galeri detail.
+
+### US-19 Status stok
+Stok tampil di kartu/detail dan produk habis tidak dapat dipesan.
+
+### US-20 Harga promo
+Harga coret hanya tampil jika lebih tinggi dari harga jual.
+
+### US-21 Keranjang WhatsApp
+Pengunjung mengumpulkan beberapa produk lalu mengirim satu ringkasan pesanan.
+
+### US-22 Tentang dan kontak toko
+Informasi toko dan kanal kontak tersedia untuk pengunjung.
+
+### US-23 Bagikan produk
+Pengunjung dapat membagikan atau menyalin URL produk.
+
+### US-24 Favorit
+Daftar favorit disimpan di browser dan dapat dibuka kembali.
+
+### US-25 Mode gelap
+Pengunjung dapat mengganti tema dan pilihan tersimpan di browser.
+
+### US-26 Metadata SEO dan Open Graph
+Halaman publik memiliki metadata, canonical, Open Graph, dan Twitter Card.
+
+### US-27 sitemap.xml dan robots.txt
+Peta situs memuat halaman publik aktif dan robots mengecualikan rute admin.
+
+### US-28 404 dan loading
+Halaman error 404 dan status loading memiliki tampilan khusus.
+
+### US-29 Upload foto ke Supabase Storage
+Foto produk diunggah dengan validasi format dan ukuran serta policy admin.
+
+### US-30 Dashboard ringkasan admin
+Dashboard merangkum total produk, status aktif, stok habis, dan popularitas.
+
+### US-31 Kelola kategori
+Admin dapat menambah, mengganti nama, dan menghapus kategori yang tidak dipakai produk.
+
+### US-32 Status aktif produk
+Admin dapat mengaktifkan atau menyembunyikan produk dari katalog.
+
+### US-33 Cari dan paginasi admin
+Daftar produk admin dapat dicari dan dinavigasi per halaman.
+
+### US-34 Validasi server
+Server memvalidasi seluruh data produk sebelum menyimpannya.
+
+### US-35 Ekspor CSV
+Admin dapat mengunduh daftar produk dalam CSV yang aman dibuka di spreadsheet.
+
+### US-36 Terakhir dilihat
+Produk yang pernah dibuka disimpan dan ditampilkan kembali di browser yang sama.
+
+### US-37 Bandingkan produk
+Pengunjung memilih hingga dua produk dan membandingkan harga, kategori, stok, dan deskripsi.
+
+### US-38 Ulasan dan rating
+Pengunjung mengirim rating dan ulasan yang menunggu persetujuan admin.
+
+### US-39 Moderasi ulasan
+Admin menyetujui atau menolak ulasan sebelum tampil untuk umum.
+
+### US-40 Analitik klik WhatsApp
+Klik pemesanan dicatat untuk produk aktif dan dapat dipakai dashboard admin.
+
+### US-41 Produk terlaris
+Dashboard menunjukkan nama produk dengan klik WhatsApp terbanyak.
+
+### US-42 Banner promo
+Admin mengelola banner promo dan memilih apakah banner tampil di beranda.
+
+### US-43 Pengaturan toko
+Admin memperbarui identitas, alamat, jam buka, nomor WhatsApp, dan informasi promo.
+
+### US-44 Akun admin
+Admin membuat akun admin dan menonaktifkan akun lain; akun saat ini dan admin aktif terakhir dilindungi.
+
+### US-45 Log aktivitas admin
+Aksi admin dicatat dan dapat ditelusuri di halaman log.
+
+### US-46 Impor CSV
+Admin mengimpor produk CSV setelah validasi semua baris dan batas file.
+
+### US-47 Urutan tampil produk
+Admin menetapkan urutan produk yang digunakan katalog dan dashboard.
+
+### US-48 Varian harga
+Admin mengatur harga per varian dan pilihan pelanggan ikut dalam pesanan.
+
+### US-49 Halaman kategori
+Setiap kategori memiliki halaman publik, metadata, dan paginasi.
+
+### US-50 Asisten AI produk
+Pengunjung menanyakan produk dan memperoleh jawaban yang dibatasi pada data katalog.

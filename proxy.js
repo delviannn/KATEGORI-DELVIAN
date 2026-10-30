@@ -28,7 +28,7 @@ export async function proxy(request) {
     "font-src 'self' https://fonts.gstatic.com data:",
     `style-src 'self' 'nonce-${nonce}' https://fonts.googleapis.com${isDevelopment ? " 'unsafe-inline'" : ""}`,
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDevelopment ? " 'unsafe-eval'" : ""}`,
-    "connect-src 'self' https://*.supabase.co https://api.openai.com https://generativelanguage.googleapis.com",
+    "connect-src 'self'",
     "upgrade-insecure-requests",
   ].join("; ");
   const requestHeaders = new Headers(request.headers);
