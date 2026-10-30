@@ -1,5 +1,5 @@
 // Service Worker untuk Katalog PWA
-const CACHE_NAME = "katalog-pwa-v1";
+const CACHE_NAME = "katalog-pwa-v2";
 const OFFLINE_URL = "/offline.html";
 
 const ASSETS_TO_CACHE = [
@@ -38,6 +38,10 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
   const url = new URL(event.request.url);
+
+  // Let the browser load external stylesheets, fonts, and other resources
+  // directly under their resource-specific CSP directives.
+  if (url.origin !== self.location.origin) return;
 
   // Jangan cache rute admin atau API
   if (url.pathname.startsWith("/admin") || url.pathname.startsWith("/api")) {
