@@ -18,14 +18,17 @@ export default async function HalamanAdmin({ searchParams }) {
     .order("urutan", { ascending: true })
     .order("created_at", { ascending: false });
   if (cari) query = query.ilike("nama", `%${cari.replaceAll("%", "\\%").replaceAll("_", "\\_")}%`);
-  const [{ data: daftarProduk, error, count }, { data: ringkasan }, { data: clicks }] = await Promise.all([
+  const [
+    { data: daftarProduk, error, count },
+    { data: ringkasanRows, error: ringkasanError },
+    { data: populerRows, error: populerError },
+  ] = await Promise.all([
     query.range((halaman - 1) * ukuran, halaman * ukuran - 1),
-    supabase.from("produk").select("id,aktif,stok"),
-    supabase.from("klik_whatsapp").select("produk_id").limit(5000),
+    supabase.rpc("admin_ringkasan_produk"),
+    supabase.rpc("admin_produk_populer"),
   ]);
-  const populer = new Map();
-  for (const click of clicks || []) populer.set(click.produk_id, (populer.get(click.produk_id) || 0) + 1);
-  const produkPalingDiminati = [...populer.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const ringkasan = ringkasanRows?.[0];
+  const produkPalingDiminati = (populerRows || []).map(({ produk_id, jumlah_klik }) => [produk_id, jumlah_klik]);
 
   return (
     <div className="flex flex-col gap-6 py-8">
@@ -38,11 +41,12 @@ export default async function HalamanAdmin({ searchParams }) {
 
       <section aria-label="Ringkasan toko" className="grid gap-3 sm:grid-cols-3">
         {[
-          ["Jumlah produk", ringkasan?.length || 0],
-          ["Produk aktif", ringkasan?.filter((item) => item.aktif).length || 0],
-          ["Stok habis", ringkasan?.filter((item) => item.stok === 0).length || 0],
+          ["Jumlah produk", ringkasan?.total || 0],
+          ["Produk aktif", ringkasan?.aktif || 0],
+          ["Stok habis", ringkasan?.stok_habis || 0],
         ].map(([label, value]) => <div key={label} className="rounded-xl border border-garis bg-latar p-4"><p className="text-sm text-teks-lembut">{label}</p><p className="mt-1 text-2xl font-extrabold">{value}</p></div>)}
       </section>
+      {(ringkasanError || populerError) && <p role="status" className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">Statistik belum tersedia. Pastikan migration katalog terbaru sudah dijalankan di Supabase.</p>}
       <section className="rounded-xl border border-garis p-4">
         <h2 className="font-bold">Produk paling sering dipesan</h2>
         {produkPalingDiminati.length ? <ol className="mt-2 list-inside list-decimal text-sm text-teks-lembut">{produkPalingDiminati.map(([id, total]) => <li key={id}>Produk #{id} · {total} klik WhatsApp</li>)}</ol> : <p className="mt-2 text-sm text-teks-lembut">Belum ada klik pemesanan.</p>}

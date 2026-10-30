@@ -3,11 +3,27 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PWARegister from "@/components/PWARegister";
 import { toko } from "@/lib/toko";
+import { getSiteUrl } from "@/lib/site";
 import { headers } from "next/headers";
 
 export const metadata = {
+  metadataBase: getSiteUrl(),
   title: toko.nama,
   description: toko.tagline,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "id_ID",
+    siteName: toko.nama,
+    title: toko.nama,
+    description: toko.tagline,
+    url: "/",
+  },
+  twitter: {
+    card: "summary",
+    title: toko.nama,
+    description: toko.tagline,
+  },
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,

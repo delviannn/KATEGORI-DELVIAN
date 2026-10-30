@@ -49,14 +49,8 @@ export default async function HalamanKatalog({ searchParams }) {
   const { data: daftarProduk, error, count } = await query.range((halaman - 1) * ukuranHalaman, halaman * ukuranHalaman - 1);
 
   // Ambil daftar seluruh kategori unik untuk chips filter
-  const { data: semuaProduk } = await supabase
-    .from("produk")
-    .select("kategori")
-    .eq("aktif", true);
-
-  const daftarKategori = Array.from(
-    new Set(semuaProduk?.map((p) => p.kategori).filter(Boolean))
-  );
+  const { data: kategoriRows } = await supabase.rpc("kategori_produk_aktif");
+  const daftarKategori = (kategoriRows || []).map((row) => row.kategori);
 
   return (
     <>

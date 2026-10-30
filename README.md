@@ -18,7 +18,7 @@ Template workshop vibe coding Creative Hub App Talent (CHAT) 2026. Repo ini beri
    ```
 
    Keluar lalu login kembali agar token baru memuat role admin. Jangan memberi role ini lewat `user_metadata`.
-5. **Isi environment variable di Vercel.** Buka proyekmu di Vercel > **Settings > Environment Variables**, lalu isi tiga variabel dari `.env.example`. Nilainya ada di Supabase > **Project Settings > API**. Setelah itu lakukan **Redeploy**.
+5. **Isi environment variable di Vercel.** Buka proyekmu di Vercel > **Settings > Environment Variables**, lalu isi tiga variabel Supabase dari `.env.example` dan `SITE_URL` dengan domain produksi kanonis. Isi `OPENAI_API_KEY` atau `GEMINI_API_KEY` hanya jika generator deskripsi AI digunakan. Setelah itu lakukan **Redeploy**.
 6. **Clone repo ke laptop.**
 
    ```bash
@@ -73,6 +73,7 @@ Urutan yang disarankan: US-01, US-02, US-03, US-04, US-05, US-06, lalu fitur bon
 - Jangan menyimpan kunci atau password di kode, dan jangan push file `.env.local`.
 - Jangan memberi awalan `NEXT_PUBLIC_` pada environment variable.
 - Isi `PROMPTS.md` setiap menyelesaikan fitur.
+- Setelah pembaruan aplikasi yang menambah kolom, fungsi, trigger, atau indeks, jalankan ulang `docs/migration-fitur-katalog.sql` di Supabase sebelum deploy.
 
 ## Sebelum mengumpulkan
 

@@ -3,18 +3,32 @@ import { notFound } from "next/navigation";
 import PilihanPesanan from "@/components/PilihanPesanan";
 import { buatSupabaseServer } from "@/lib/supabase";
 import { formatRupiah } from "@/lib/format";
+import { getSiteUrl } from "@/lib/site";
 import GaleriProduk from "@/components/GaleriProduk";
 import InteraksiProduk from "@/components/InteraksiProduk";
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const supabase = buatSupabaseServer();
-  const { data } = await supabase.from("produk").select("nama, deskripsi, foto_url").eq("id", id).maybeSingle();
+  const { data } = await supabase.from("produk").select("nama, deskripsi, foto_url").eq("id", id).eq("aktif", true).maybeSingle();
   if (!data) return { title: "Produk tidak ditemukan" };
   return {
     title: data.nama,
     description: (data.deskripsi || `Lihat detail ${data.nama} di katalog Toko Delviann.`).slice(0, 160),
-    openGraph: { title: data.nama, description: data.deskripsi || "Katalog Toko Delviann", images: data.foto_url ? [data.foto_url] : [] },
+    alternates: { canonical: new URL(`/produk/${id}`, getSiteUrl()).toString() },
+    openGraph: {
+      type: "website",
+      title: data.nama,
+      description: (data.deskripsi || "Katalog Toko Delviann").slice(0, 160),
+      url: new URL(`/produk/${id}`, getSiteUrl()).toString(),
+      images: data.foto_url ? [data.foto_url] : [],
+    },
+    twitter: {
+      card: data.foto_url ? "summary_large_image" : "summary",
+      title: data.nama,
+      description: (data.deskripsi || "Katalog Toko Delviann").slice(0, 160),
+      ...(data.foto_url ? { images: [data.foto_url] } : {}),
+    },
   };
 }
 

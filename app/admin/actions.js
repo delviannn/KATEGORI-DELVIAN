@@ -5,6 +5,21 @@ import { revalidatePath } from "next/cache";
 import { buatSupabaseSesi } from "@/lib/supabase";
 import { batasiPermintaan } from "@/lib/rate-limit";
 import { randomUUID } from "node:crypto";
+import { buatSupabaseServer } from "@/lib/supabase";
+
+async function catatAksiAdmin(user, aksi, entitas, entitasId = null) {
+  try {
+    const supabase = buatSupabaseServer();
+    await supabase.from("log_admin").insert({
+      admin_id: user.id,
+      aksi,
+      entitas,
+      entitas_id: entitasId === null ? null : String(entitasId),
+    });
+  } catch {
+    // Logging is best effort; an audit-log outage must not lose a valid product change.
+  }
+}
 
 async function unggahFoto(formData, supabase, fotoUrl) {
   const file = formData.get("foto_file");
@@ -109,12 +124,15 @@ export async function login(_prevState, formData) {
     return { error: "Email atau password salah." };
   }
 
+  await catatAksiAdmin(data.user, "login", "auth_user", data.user.id);
   redirect("/admin");
 }
 
 // US-04: keluar (logout) admin.
 export async function keluar() {
   const supabase = await buatSupabaseSesi();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user?.app_metadata?.role === "admin") await catatAksiAdmin(user, "logout", "auth_user", user.id);
   await supabase.auth.signOut();
   redirect("/admin/login");
 }
@@ -155,6 +173,8 @@ export async function gantiPassword(_prevState, formData) {
     return { error: "Gagal mengganti password. Pastikan password memenuhi ketentuan, lalu coba lagi." };
   }
 
+  await catatAksiAdmin(user, "ubah_password", "auth_user", user.id);
+
   return { sukses: "Password berhasil diganti." };
 }
 
@@ -172,14 +192,16 @@ export async function tambahProduk(_prevState, formData) {
   const foto = await unggahFoto(formData, supabase, parsed.data.foto_url);
   if (foto.error) return { error: foto.error };
 
-  const { error } = await supabase.from("produk").insert({
+  const { data: produkBaru, error } = await supabase.from("produk").insert({
     ...parsed.data,
     foto_url: foto.foto_url,
-  });
+  }).select("id").single();
 
   if (error) {
     return { error: "Gagal menyimpan produk. Periksa data dan coba lagi." };
   }
+
+  await catatAksiAdmin(user, "tambah_produk", "produk", produkBaru?.id);
 
   revalidatePath("/admin");
   revalidatePath("/");
@@ -220,6 +242,8 @@ export async function ubahProduk(_prevState, formData) {
     return { error: "Gagal memperbarui produk. Periksa data dan coba lagi." };
   }
 
+  await catatAksiAdmin(user, "ubah_produk", "produk", id);
+
   revalidatePath("/admin");
   revalidatePath("/");
   revalidatePath(`/produk/${id}`);
@@ -246,6 +270,8 @@ export async function hapusProduk(idRaw) {
   if (error) {
     return { error: "Gagal menghapus produk. Silakan coba lagi." };
   }
+
+  await catatAksiAdmin(user, "hapus_produk", "produk", id);
 
   revalidatePath("/admin");
   revalidatePath("/");
