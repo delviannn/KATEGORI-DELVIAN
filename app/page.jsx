@@ -46,7 +46,21 @@ export default async function HalamanKatalog({ searchParams }) {
     query = query.eq("kategori", kategori);
   }
 
-  const { data: daftarProduk, error, count } = await query.range((halaman - 1) * ukuranHalaman, halaman * ukuranHalaman - 1);
+  let { data: daftarProduk, error, count } = await query.range((halaman - 1) * ukuranHalaman, halaman * ukuranHalaman - 1);
+
+  // Older Supabase schemas may not have the optional catalog columns yet.
+  // Retry with the original core fields so a partial migration cannot blank the storefront.
+  let schemaFallback = false;
+  if (error) {
+    let fallbackQuery = supabase
+      .from("produk")
+      .select("id, nama, harga, foto_url", { count: "exact" })
+      .eq("aktif", true)
+      .order("created_at", { ascending: false });
+    if (q) fallbackQuery = fallbackQuery.ilike("nama", `%${q}%`);
+    ({ data: daftarProduk, error, count } = await fallbackQuery.range((halaman - 1) * ukuranHalaman, halaman * ukuranHalaman - 1));
+    schemaFallback = !error;
+  }
 
   // Ambil daftar seluruh kategori unik untuk chips filter
   const { data: kategoriRows } = await supabase.rpc("kategori_produk_aktif");
@@ -105,6 +119,11 @@ export default async function HalamanKatalog({ searchParams }) {
           <button className="rounded-lg border border-garis px-3 py-2 font-medium hover:bg-permukaan">Terapkan</button>
         </form>
 
+        {schemaFallback && !error && (
+          <p className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-amber-800">
+            Katalog dimuat dengan data dasar. Beberapa filter dan informasi tambahan belum tersedia.
+          </p>
+        )}
         {error ? (
           <p className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-700">
             Katalog sedang tidak dapat dimuat. Silakan coba lagi beberapa saat lagi.
